@@ -6,4 +6,7 @@ Ejercicio		int not null,
 Descuento		float,
 CuoataAnual		float,
 CuotaMensual	float
+
+CONSTRAINT priCuotasAnuales	PRIMARY KEY(Cliente,Ejercicio)
+
 )
