@@ -4,9 +4,10 @@ CREATE TABLE dbo.nvk_tb_CuotasClientesAnual
 Cliente			varchar(10)	not null,
 Ejercicio		int not null,
 Descuento		float,
-CuoataAnual		float,
+CuotaAnual		float,
 CuotaMensual	float
 
 CONSTRAINT priCuotasAnuales	PRIMARY KEY(Cliente,Ejercicio)
 
 )
+
