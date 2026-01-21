@@ -1,5 +1,5 @@
-IF NOT EXISTS (SELECT 1 FROM SYS.TABLES WHERE NAME = 'nvk_CuotasClientesAnual')
-CREATE TABLE dbo.nvk_CuotasClientesAnual
+IF NOT EXISTS (SELECT 1 FROM SYS.TABLES WHERE NAME = 'nvk_tb_CuotasClientesAnual')
+CREATE TABLE dbo.nvk_tb_CuotasClientesAnual
 (
 Cliente			varchar(10)	not null,
 Ejercicio		int not null,
