@@ -89,3 +89,29 @@ SELECT Cliente,
 FROM Cte
 WHERE Descripcion16 IS NOT NULL    
 AND ListaPreciosEsp <> Descripcion16
+
+
+--select dbo.nvk_fn_DescuentoCliente (126036)
+-- Agregar en VentaD Tabla valor por omision
+IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE NAME = 'nvk_fn_DescuentoCliente')
+DROP FUNCTION dbo.nvk_fn_DescuentoCliente
+GO
+CREATE FUNCTION dbo.nvk_fn_DescuentoCliente(@Id	int)
+RETURNS FLOAT
+AS
+BEGIN
+DECLARE @Descuento	float
+
+
+SELECT
+	@Descuento = ntcca.Descuento
+FROM
+	Cte c
+LEFT JOIN Venta v ON v.Cliente = c.Cliente 
+LEFT JOIN nvk_tb_CuotasClientesAnual ntcca ON c.Cliente = ntcca.cliente
+WHERE V.ID= @ID
+AND YEAR(v.FechaEmision) = ntcca.Ejercicio 
+
+
+	RETURN @Descuento
+END
