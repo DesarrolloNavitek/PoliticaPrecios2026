@@ -1,0 +1,91 @@
+[VentaD.tbl/Impuesto1]
+CondicionDespliege=(SQL(<T>SELECT TOP 1 m.subclave FROM Venta v left outer join ventad vd on v.id=vd.id left outer join Movtipo m on m.mov=v.mov and m.modulo=:t where vd.id=:NID<T>,<T>VTAS<T>,ID) = <T>VTAS.F<T>)
+
+[VentaD.tbl/TipoImpuesto1]
+CondicionDespliege=(SQL(<T>SELECT TOP 1 m.subclave FROM Venta v left outer join ventad vd on v.id=vd.id left outer join Movtipo m on m.mov=v.mov and m.modulo=:t where vd.id=:NID<T>,<T>VTAS<T>,ID) = <T>VTAS.F<T>)
+
+[VentaD.tbl/SubCuenta]
+CondicionDespliege=Empresa.Empresa=<T>0<T>
+
+[VentaD.tbl/DescripcionExtra]
+ValorRefrescar=
+
+[VentaD.tbl/Detalle]
+GuardarPorRegistro=S
+
+[VentaD.tbl/Cantidad]
+ValidacionConCondiciones=S
+ValidacionMensajeError=<T>No es multiplo de caja <T>+SQL(<T>SELECT DBO.MURFNFACTORCAJAVTAS(:TART)<T>, ARTICULO)
+ValidacionCondicion=SQL(<T> SELECT DBO.MURFNCAJASNAVITEK(:TART,:NCANT,:TMOV)<T>,Articulo,Cantidad,Venta:Venta.Mov)=1
+
+[VentaD.tbl/DescuentoImporte]
+ValorRefrescar=
+AlCambiar=Asigna(DescuentoLinea,  Si(DescuentoImporte >0,  100-( (DescuentoImporte*100)/Precio)),66)
+Nombre=Precio Negociado
+TamanoValidacion=10
+ConRefrescar=S
+
+[VentaD.tbl/DescuentoLinea.ListaRefrescar]
+(Inicio)=Impuesto1
+DescuentoImporte=
+
+[VentaD.tbl/Instruccion]
+Nombre=Lista
+ValorPorOmision=Venta:Venta.ListaPreciosEsp
+TamanoValidacion=15
+AyudaEnCaptura=Expresion
+AlCambiar=Asigna(Precio, sql(<T>MURSPPRECIODETALLENAVI :TART,:TLISTA<T>,ARTICULO,Instruccion))Asigna(DescuentoLinea,  Si(DescuentoImporte >0,  100-( (DescuentoImporte*100)/Precio)),66)
+Formula=SQLENLISTA(<T>MURspLISTAPRECIOS :NID<T>,vENTA:vENTA.iD)
+
+[VentaD.tbl/DescuentoLinea]
+ValorPorOmision=SQL( <T>SELECT dbo.nvk_fn_DescuentoCliente (:nId)<T>,Venta:Venta.ID)
+;sql(<T>SELECT ServicioNumero FROM VENTA WHERE ID=:NID<T>,Venta:Venta.ID)
+ValorRefrescar=SQL( <T>SELECT dbo.nvk_fn_DescuentoCliente (:nId)<T>,Venta:Venta.ID)
+;sql(<T>SELECT ServicioNumero FROM VENTA WHERE ID=:NID<T>,Venta:Venta.ID)
+
+[VentaD.tbl/Cantidad.ListaRefrescar]
+PrecioSugerido=Costo
+DescuentoImporte=
+Retencion3=DescuentoLinea
+DescuentoLinea=(Fin)
+
+[VentaD.tbl/Codigo]
+CondicionDespliege=(General.MovCB) O (SQL(<T>SELECT TOP 1 m.subclave FROM Venta v left outer join ventad vd on v.id=vd.id left outer join Movtipo m on m.mov=v.mov and m.modulo=:t where vd.id=:NID<T>,<T>VTAS<T>,ID) = <T>VTAS.EXPORT<T>)
+
+[VentaD.Tbl/Precio]
+ValorRefrescar=Asigna(Info.RefrescandoPrecio, Verdadero)<BR>Asigna(Info.Articulo, Articulo)<BR>Si (((MovSubTipo(<T>VTAS<T>, Venta:Venta.Mov)en(<T>VTAS<T>,<T>VTAS.PE<T>)) y MovTipoEn(<T>VTAS<T>, Venta:Venta.Mov, (VTAS.C))))<BR>Entonces<BR>  Redondea(Precio+((Precio*PorcentajeUtilidad)/100),2)<BR>SiNo<BR> Si<BR>   Info.Copiar<BR> Entonces<BR>   Asigna(VentaD:VentaD.PrecioSugerido, Info.Precio)<BR>   Info.Precio<BR> Sino<BR>   Asigna(Temp.Flotante,<BR>   Si<BR>     Config.VentaSolicitarPrecios y VentaD:Art.SolicitarPrecios<BR>   Entonces<BR>     Si(Vacio(Precio), Si(Forma(<T>ArtPreciosLista<T>), Info.Precio), Precio)<BR>   Sino<BR>     Si(Vacio(Aplica) o Config.VentaPPIndirectos, Si(Config.PrecioNivelUnidad, CalcularPrecio, PrecioUnidadAlterna(VentaD:Art.Unidad, Unidad, Cantidad, CantidadInventario, CalcularPrecio)), Precio)<BR>   Fin)<BR>   Asigna(VentaD:VentaD.PrecioSugerido, Temp.Flotante)<BR>   Temp.Flotante<BR> Fin<BR>Fin
+Nombre=Precio Lista
+TamanoValidacion=10
+
+[VentaD.Tbl/Articulo.ListaRefrescar]
+PrecioSugerido=Impuesto1
+DescuentoImporte=
+FAEPorcentaje=ListaPrecioDetalle
+ListaPrecioDetalle=(Fin)
+
+[VentaD.Tbl/Tabla.ListaCampos]
+FAEPorcentaje=ListaPrecioDetalle
+ListaPrecioDetalle=(Fin)
+
+[VentaD.Tbl/Tabla.SQL]
+EmidaConfirmarTelefono,=FAEPorcentaje,
+FAEPorcentaje=
+FAEPorcentaje,=ListaPrecioDetalle
+ListaPrecioDetalle=FROM VentaD
+
+[VentaD.Tbl/ListaPrecioDetalle]
+Clave=ListaPrecioDetalle
+Nombre=ListaPrecioDetalle
+Visible=S
+TamanoValidacion=50
+TipoDatos=Texto
+Tamano=50
+ValorRefrescar=Temp.Texto
+
+[VentaD.Tbl/ServicioNumero]
+Nombre=Peso Real
+CondicionDespliege=SQL(<T>SELECT TOP 1 m.subclave FROM Venta v left outer join ventad vd on v.id=vd.id left outer join Movtipo m on m.mov=v.mov and m.modulo=:t where vd.id=:NID<T>,<T>VTAS<T>,VentaD.ID) en ( <T>VTAS.EXPORT<T>,<T>VTAS.EXPORTF<T>)
+
+[VentaD.Tbl/Tarima]
+CondicionEdicion=Usuario.CteArt
+
