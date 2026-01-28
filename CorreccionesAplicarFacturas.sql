@@ -44,14 +44,13 @@ AND YEAR(v.FechaEmision) = ntcca.Ejercicio
 	RETURN @Descuento
 END
 GO
-/******************************************* nvk_xp_VaidaPreciosDetalle  **********************************************/
-IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'nvk_xp_VaidaPreciosDetalle')
-DROP PROCEDURE nvk_xp_VaidaPreciosDetalle
+/******************************************* nvk_xp_ValidaPreciosDetalle  **********************************************/
+IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'nvk_xp_ValidaPreciosDetalle')
+DROP PROCEDURE nvk_xp_ValidaPreciosDetalle
 GO
-CREATE PROC nvk_xp_VaidaPreciosDetalle  @Id     int
+CREATE PROC nvk_xp_ValidaPreciosDetalle  @Id     int
 AS
 BEGIN
-       ;
 
 
 WITH VentaBase AS (
@@ -305,8 +304,8 @@ END
 
 
    --EXEC MURSPVALIDAPRECIOSDETALLE  @ID
-    --JARC Vaida Precios con nueva pólitica de precios sustituye MURSPVALIDAPRECIOSDETALLE
-     EXEC nvk_xp_VaidaPreciosDetalle @ID  
+    --JARC Vaida Precios con nueva pÃ³litica de precios sustituye MURSPVALIDAPRECIOSDETALLE
+     EXEC nvk_xp_ValidaPreciosDetalle @ID  
 
    exec MURSPVALIDAPRECIOSDETALLEdir  @id,@usuario,@ok output, @okref  output                         
                          
@@ -439,7 +438,7 @@ BEGIN
 --  end                                                   
                                                                                            
   --Fin de la Validacion                                                                                                        
---------------------------------------------------------------Validación CXC Yisus -----------------                                                                                                      
+--------------------------------------------------------------ValidaciÃ³n CXC Yisus -----------------                                                                                                      
         
 If @Accion IN ('Afectar'   ,'VERIFICAR')        
 begin                                                                             
@@ -536,7 +535,7 @@ end
 --  END                                                                                                
 --  end                                                                                                
 --  end                                                                            
----------------------------------------------Fin Validación------------------------------                                                               
+---------------------------------------------Fin ValidaciÃ³n------------------------------                                                               
  /*******Inicio Copiar MovId Orden Compra********/                                                                                   
 IF  @Modulo = 'COMS'                                                                                
    BEGIN                     
@@ -647,7 +646,7 @@ IF @REGIMENFIS = 626       and @lenrfc=13
              AND ID = @EnviarA        
         
           IF @Direccion = '' OR @CP = '' OR @Delegacion = '' OR @Estado = '' OR @Poblacion = '' OR @Pais = ''        
-            SELECT @Ok = 10060, @OkRef = 'Falta capturar la Direccion o Código Postal o Delegación o Estado o Población o País de la Sucursal del Cliente'        
+            SELECT @Ok = 10060, @OkRef = 'Falta capturar la Direccion o CÃ³digo Postal o DelegaciÃ³n o Estado o PoblaciÃ³n o PaÃ­s de la Sucursal del Cliente'        
         END        
       END        
         
@@ -662,16 +661,16 @@ IF @REGIMENFIS = 626       and @lenrfc=13
           WHERE ID = @ID        
         
         IF @SATExportacion IS NULL OR @Subdivision IS NULL OR @Incoterm IS NULL OR @MotivoTraslado IS NULL OR @TipoOperacion IS NULL        
-          SELECT @Ok = 10060, @OkRef = 'Falta capturar Incoterm o SubDivision o Motivo Traslado o Tipo Operación o Sat Exportación'        
+          SELECT @Ok = 10060, @OkRef = 'Falta capturar Incoterm o SubDivision o Motivo Traslado o Tipo OperaciÃ³n o Sat ExportaciÃ³n'        
       END        
 /*     
-Dirección        
+DirecciÃ³n        
 CP        
-Delegación o municipio        
+DelegaciÃ³n o municipio        
 Colonia        
 Estado        
-Población en caso de que no tenga dato en el catálogo del SAT, que acepte texto capturado        
-País        
+PoblaciÃ³n en caso de que no tenga dato en el catÃ¡logo del SAT, que acepte texto capturado        
+PaÃ­s        
         
 */        
         
@@ -813,7 +812,7 @@ País
            AND d.Cantidad/r.Factor <> ROUND(d.Cantidad/r.Factor, 0)        
         
         IF @Articulo IS NOT NULL        
-          SELECT @Ok = 10060, @OkRef = 'La cantidad del Artículo ' + @Articulo + ' no es factor de Caja'        
+          SELECT @Ok = 10060, @OkRef = 'La cantidad del ArtÃ­culo ' + @Articulo + ' no es factor de Caja'        
       END        
     END        
         
@@ -885,7 +884,7 @@ País
                     AND     i.Mov = 'Consumo'     
                     AND     i.Estatus = 'BORRADOR'     
                     AND     d.INFORCostoIndirecto = @INFORCostoIndirecto)    
-            SELECT @Ok=20180, @OkRef='No Es Posible Afectar la Entrada Produccion si el Consumo no está CONCLUIDO'      
+            SELECT @Ok=20180, @OkRef='No Es Posible Afectar la Entrada Produccion si el Consumo no estÃ¡ CONCLUIDO'      
     END    
    --IF (@MovTipo IN ('INV.S', 'INV.E') AND @SubClave IN ('INV.ENTPRO', 'INV.CONSPRO') AND @Accion='AFECTAR' )       
    IF (@MovTipo IN ('INV.S', 'INV.E') AND @OrigenTipo IS NULL) AND @MOV IN ('Consumo Produccion','Entrada Produccion')      
@@ -1037,13 +1036,13 @@ BEGIN
                  END            
             END
     /*JARC mandar llamar el sp que afecta el pedido*/
-        IF @Accion='AFECTAR'              
+/*        IF @Accion='AFECTAR'              
         BEGIN
 
             IF @Mov = 'Cotizacion' AND @Estatus ='PENDIENTE'
             EXEC nvk_sp_GenerarPedido @Sucursal,@Modulo,@ID, @Usuario
 
-        END
+        END*/
 
 END
 
