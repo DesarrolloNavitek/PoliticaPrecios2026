@@ -1,0 +1,247 @@
+[Cte.tbl/Tabla.ListaCampos]
+UsuarioResp=CRMID
+CRMID=PrimaryContactId
+PrimaryContactId=TemaCRM
+TemaCRM=CRMObjectId
+CRMObjectId=MovimientoUltimoCobro
+MovimientoUltimoCobro=FechaUltimoCobro
+FechaUltimoCobro=FechaUltimoCobroAux
+FechaUltimoCobroAux=MovimientoUltimoCobroAux
+MovimientoUltimoCobroAux=CalculoMoratorioMAVI
+CalculoMoratorioMAVI=CtaBanco
+CtaBanco=ClaveBanco
+ClaveBanco=ClabeCuenta
+ClabeCuenta=Tarjeta
+Tarjeta=PaginaWeb
+PaginaWeb=eMail
+eMail=NombreComercial
+NombreComercial=ReferidoNombre
+ReferidoNombre=ReferidoMail
+ReferidoMail=ReferidoTelefono
+ReferidoTelefono=ReferidoRFC
+ReferidoRFC=RelacionReferencia
+RelacionReferencia=Origen
+Origen=EsFavorito
+EsFavorito=Ubicacion
+Ubicacion=vic_NoValidarContrato
+vic_NoValidarContrato=DireccionMax
+DireccionMax=MFATipoOperacion
+MFATipoOperacion=FormaPagoTipo
+FormaPagoTipo=(Fin)
+
+[Cte.tbl/Tabla.SQL]
+FiscalRegimen,=FiscalZona,
+TipoRegistro,=FiscalGenerar,
+ReferenciaIntelisisService,=DefPosicionRecibo,
+FiscalGenerar,=ContactoTipo,
+FiscalZona,=PedidoDef,
+Cliente as ContactoTipo,=
+TarimasChep,=CRMID,
+SincronizarCRM,=PrimaryContactId,
+Longitud,=CtaBanco,
+CuentaCompleAnticipo,=CRMObjectId,
+Embarazo,=MunicipioNacimiento,
+NacioExt,=Migrante2,
+MunicipioNacimiento,=NacioExt,
+ResideExt,=FormaPagoTipo
+TipoPacientePago,=ResideExt,
+UsuarioSt,=UsuarioResp,
+UsuarioResp=
+ContactoTipo,=ReferenciaIntelisisService,
+CRMID,=SincronizarCRM,
+PrimaryContactId,=TemaCRM,
+TemaCRM,=AccesoWeb,
+UsuarioResp,=CuentaAnticipo,
+CRMObjectId,=MovimientoUltimoCobro,
+MovimientoUltimoCobro,=FechaUltimoCobro,
+FechaUltimoCobro,=FechaUltimoCobroAux,
+FechaUltimoCobroAux,=MovimientoUltimoCobroAux,
+MovimientoUltimoCobroAux,=CalculoMoratorioMAVI,
+CalculoMoratorioMAVI,=Latitud,
+CtaBanco,=ClaveBanco,
+ClaveBanco,=ClabeCuenta,
+ClabeCuenta,=Tarjeta,
+Tarjeta,=PaginaWeb,
+PaginaWeb,=eMail,
+eMail,=NombreComercial,
+NombreComercial,=ReferidoNombre,
+ReferidoNombre,=ReferidoMail,
+ReferidoMail,=ReferidoTelefono,
+ReferidoTelefono,=ReferidoRFC,
+ReferidoRFC,=RelacionReferencia,
+RelacionReferencia,=Origen,
+Origen,=EsFavorito,
+EsFavorito,=Ubicacion,
+Ubicacion,=vic_NoValidarContrato,
+vic_NoValidarContrato,=DireccionMax,
+DireccionMax,=MFATipoOperacion,
+MFATipoOperacion,=PersonalNacionalidadCve,
+FormaPagoTipo=FROM Cte
+
+[Cte.tbl/FormaPagoTipo]
+Clave=FormaPagoTipo
+Nombre=FormaPagoTipo
+Visible=S
+TamanoValidacion=50
+TipoDatos=Texto
+Tamano=50
+AyudaForma=FormaPagoTipo
+AyudaVista=FormaPagoTipo
+AyudaCampo=FormaPagoTipo.Tipo
+AyudaEnCaptura=Validaciones Memoria
+AyudaMemTabla=FormaPagoTipo
+AyudaMemEnBlanco=S
+AyudaMemOpc=Unicamente opciones listadas
+
+[Cte.tbl/Descripcion12]
+Nombre=Lista 2
+AyudaEnCaptura=Validaciones Memoria
+AyudaMemRenglones=20
+AyudaMemOpc=Unicamente opciones listadas
+AyudaRefrescar=
+Formula=
+AyudaMemTabla=ListaPreciosEsp
+AyudaMemEnBlanco=S
+
+[Cte.tbl/Descripcion14]
+Nombre=Lista 3
+AyudaEnCaptura=Validaciones Memoria
+AyudaMemRenglones=20
+AyudaMemOpc=Unicamente opciones listadas
+AyudaRefrescar=
+Formula=
+AyudaMemTabla=ListaPreciosEsp
+AyudaMemEnBlanco=S
+
+[Cte.tbl/Descripcion16]
+Nombre=Lista 4
+AyudaEnCaptura=Validaciones Memoria
+AyudaMemRenglones=20
+AyudaMemOpc=Unicamente opciones listadas
+AyudaRefrescar=
+Formula=
+AyudaMemTabla=ListaPreciosEsp
+AyudaMemEnBlanco=S
+
+[Cte.tbl/CreditoEspecial]
+ValorPorOmision=Verdadero
+
+[Cte.tbl/Descripcion1]
+Nombre=Ancho de Pieza
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion2]
+Nombre=Centrado
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion3]
+Nombre=Elogación
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion4]
+Nombre=Espesor Adhesivo
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion5]
+Nombre=Espesor Sustrato
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion6]
+Nombre=Espesor Total
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+ValorPorOmision=<T>Si<T>
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion7]
+Nombre=Longitud Lineal
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion8]
+Nombre=Loop Tack
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+ValorPorOmision=<T>Si<T>
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion9]
+Nombre=Peel
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+ValorPorOmision=<T>Si<T>
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/Descripcion10]
+Nombre=Shear
+AyudaEnCaptura=Lista de Opciones
+AyudaRefrescar=
+Formula=
+OpcionesColumnas=1
+ValorPorOmision=<T>Si<T>
+OpcionesPredefinidas=Si - No
+OpcionesRenglones=8
+
+[Cte.tbl/CRMInfluencia]
+TamanoValidacion=200
+Tamano=100
+
+[Cte.tbl/Descripcion11]
+Nombre=Condicion de Liberacion
+
+[Cte.tbl/Descripcion13]
+Nombre=Tiene Pagare
+
+[Cte.tbl/CrmImporte]
+Nombre=Monto Pagare
+
+[Cte.tbl/Descripcion17]
+Nombre=Fecha Pagare
+AyudaEnCaptura=Calendario sin Hora
+AyudaRefrescar=
+Formula=
+
+[Cte.tbl/Descripcion19]
+Nombre=Fecha Autoriacion Credito
+AyudaEnCaptura=Calendario sin Hora
+AyudaRefrescar=
+Formula=
+
