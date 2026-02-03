@@ -36,8 +36,8 @@ WITH VentaBase AS (
                (vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100) AS PrecioMinimo,
                (vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100) AS PrecioVenta
         FROM VentaBase vb
-        JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
-        JOIN Art a ON a.Articulo = vb.Articulo
+        LEFT JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
+        --JOIN Art a ON a.Articulo = vb.Articulo
     )
 
     --SELECT * FROM Diferencia where PrecioVenta < PrecioMinimo
@@ -49,4 +49,5 @@ WITH VentaBase AS (
     and vd.RenglonID = d.RenglonID
     and PrecioVenta < PrecioMinimo
 RETURN
+
 END
