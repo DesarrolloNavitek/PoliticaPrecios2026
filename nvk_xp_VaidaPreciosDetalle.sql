@@ -1,7 +1,7 @@
-IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'nvk_xp_VaidaPreciosDetalle')
-DROP PROCEDURE nvk_xp_VaidaPreciosDetalle
+IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'nvk_xp_ValidaPreciosDetalle')
+DROP PROCEDURE nvk_xp_ValidaPreciosDetalle
 GO
-CREATE PROC nvk_xp_VaidaPreciosDetalle  @Id     int
+CREATE PROC nvk_xp_ValidaPreciosDetalle  @Id     int
 AS
 BEGIN
        ;
@@ -51,3 +51,4 @@ WITH VentaBase AS (
 RETURN
 
 END
+
