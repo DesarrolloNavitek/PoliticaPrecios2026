@@ -52,17 +52,12 @@ DECLARE
        AND vd.RenglonID = d.RenglonID
        AND PrecioVenta < PrecioMinimo
 
-
        IF @Articulo IS NOT NULL
        BEGIN
        SELECT @OK = 20305,@OkRef = 'El artículo '+TRIM(@Articulo)+' no cubre el precio minimo'
        END
-
-
-
 RETURN
-
 END
-GO
+
 
 
