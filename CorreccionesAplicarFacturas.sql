@@ -48,12 +48,16 @@ GO
 IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'nvk_xp_ValidaPreciosDetalle')
 DROP PROCEDURE nvk_xp_ValidaPreciosDetalle
 GO
-CREATE PROC nvk_xp_ValidaPreciosDetalle  @Id     int
+CREATE PROC nvk_xp_ValidaPreciosDetalle  
+    @Id                 int,
+    @OK                 int output,
+    @OkRef              varchar(255) output
 AS
 BEGIN
+DECLARE
+    @Articulo  varchar(20)
 
-
-WITH VentaBase AS (
+;WITH VentaBase AS (
         SELECT v.id, ntcca.Descuento, C.ListaPreciosEsp, vd.Articulo,
                CASE 
                    WHEN C.ListaPreciosEsp = '(Precio Lista)' THEN a.PrecioLista
@@ -82,18 +86,23 @@ WITH VentaBase AS (
                (vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100) AS PrecioMinimo,
                (vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100) AS PrecioVenta
         FROM VentaBase vb
-        JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
-        JOIN Art a ON a.Articulo = vb.Articulo
+        LEFT JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
+        --JOIN Art a ON a.Articulo = vb.Articulo
     )
 
     --SELECT * FROM Diferencia where PrecioVenta < PrecioMinimo
 
-    UPDATE VentaD set DescripcionExtra = 'Por Debajo del Precio Permitido '+ (CONVERT(VARCHAR(10),(PrecioMinimo-PrecioVenta)))
-    from VentaD vd, Diferencia d
-    where vd.ID = d.ID 
-    AND vd.Renglon=d.Renglon
-    and vd.RenglonID = d.RenglonID
-    and PrecioVenta < PrecioMinimo
+    SELECT TOP 1 @Articulo = vd.Articulo
+      FROM VentaD vd
+      LEFT JOIN Diferencia d ON vd.ID = d.ID
+     WHERE vd.Renglon=d.Renglon
+       AND vd.RenglonID = d.RenglonID
+       AND PrecioVenta < PrecioMinimo
+
+       IF @Articulo IS NOT NULL
+       BEGIN
+       SELECT @OK = 20305,@OkRef = 'El artículo '+TRIM(@Articulo)+' no cubre el precio minimo'
+       END
 RETURN
 END
 GO
@@ -1714,4 +1723,5 @@ SELECT @RenglonID = COUNT(vd.RenglonID)
             EXEC spAfectar @Modulo, @IdGenerado, 'AFECTAR', 'Todo', NULL, @Usuario
 RETURN
 END
+
 
