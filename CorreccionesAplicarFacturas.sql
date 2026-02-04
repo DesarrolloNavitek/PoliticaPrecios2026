@@ -101,7 +101,7 @@ GO
 IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'xpAntesAfectar')
 DROP PROCEDURE dbo.xpAntesAfectar
 GO
-CREATE PROCEDURE dbo.xpAntesAfectar       
+CREATE PROCEDURE dbo.xpAntesAfectar
 @Modulo                     char(5),                                                                                                            
 @ID                         int,                                                                                                            
 @Accion                     char(20),                                                                                                            
@@ -114,65 +114,70 @@ CREATE PROCEDURE dbo.xpAntesAfectar
 @OkRef                      varchar(255)  OUTPUT,    
 @FechaRegistro              datetime                                                                                                            
 AS BEGIN                                                                                                           
-                                                                                                          
-                                                                                                          
  DECLARE                                                                                                          
- --@CLAVE VARCHAR (20),                                                                                                          
- @ESTATUS VARCHAR (20),                                                                                                          
- @MOV  VARCHAR(50),                                                                    
- @MovID VARCHAR (20),                                                                     
- @MovTipo VARCHAR(20),        
- @OrigenTipo Varchar(10),                                                                                                         
- @Origen varchar(20),                                                                                                        
- @OrigenID    varchar(20),        
- @IDAplica      int,        
- @Movimiento varchar (20),                                                                                                        
- @Clave   Varchar (10),                                                                                                        
- @Empresa  Varchar (5),                                                                                                        
- @Sucursal  Int,                                                                                                        
- @CentroCosto Varchar (50),                                                                                                        
- @FormadePago   VARCHAR(30),                                                                                                      
- @CtaDinero  varchar(10),                                                                                                      
- @FormaCobro varchar(50),                                                                                                    
- @CtePais varchar(50),                                      
- @PesoTotal float,                                                                                                
- @ClavePresupuestal varchar (50),                      
- @PesoFaltante float,                         
- @AnticipoSaldo float,                            
- @Secompra int,                                          
- @Articulo varchar(20),                                        
- @Prov varchar(10),                              
- @ALM   VARCHAR(10),                        
- @ALMADESTINO VARCHAR(10),                                      
- @CERRADO BIT      ,                  
- @situacion  VARCHAR(50),                  
- @MovClave     varchar(20),                  
- @FechaEmision datetime,        
- @Renglon     float,        
- @RenglonSub  int,        
- @FechaCaducidad    datetime,        
- @Referencia        varchar(50),        
- @CteArt            bit,        
- @Cliente           varchar(10),        
- @EnviarA           int,        
- @Direccion         varchar(100),        
- @CP                varchar(15),        
- @Delegacion        varchar(100),        
- @Colonia           varchar(100),        
- @Estado            varchar(100),        
- @Poblacion         varchar(100),        
- @Pais              varchar(100),        
- @SATExportacion    varchar(100),        
- @Subdivision       varchar(100),        
- @Incoterm          varchar(100),        
- @MotivoTraslado    varchar(100),        
- @TipoOperacion     varchar(100),        
- @Departamento      varchar(50),        
- @UsuarioSucursal   int,        
- @CantidadExcede    float,    
- @INFORCostoIndirecto    FLOAT,    
- @Agente   varchar(10)    
+ --@CLAVE varchar (20),                                                                                                          
+ @Estatus                   varchar (20),                                                                                                          
+ @Mov                       varchar(50),                                                                    
+ @MovID                     varchar (20),                                                                     
+ @MovTipo                   varchar(20),        
+ @OrigenTipo                varchar(10),                                                                                                         
+ @Origen                    varchar(20),                                                                                                        
+ @OrigenID                  varchar(20),        
+ @IDAplica                  int,        
+ @Movimiento                varchar (20),                                                                                                        
+ @Clave                     varchar (10),                                                                                                        
+ @Empresa                   varchar (5),                                                                                                        
+ @Sucursal                  Int,                                                                                                        
+ @CentroCosto               varchar (50),                                                                                                        
+ @FormadePago               varchar(30),                                                                                                      
+ @CtaDinero                 varchar(10),                                                                                                      
+ @FormaCobro                varchar(50),                                                                                                    
+ @CtePais                   varchar(50),                                      
+ @PesoTotal                 float,                                                                                                
+ @ClavePresupuestal         varchar (50),                      
+ @PesoFaltante              float,                         
+ @AnticipoSaldo             float,                                           
+ @Secompra                  int,                                          
+ @Articulo                  varchar(20),                                        
+ @Prov                      varchar(10),                              
+ @Alm                       varchar(10),                        
+ @AlmDestino                varchar(10),                                      
+ @Cerrado                   bit,                  
+ @Situacion                 varchar(50),                  
+ @MovClave                  varchar(20),                  
+ @FechaEmision              datetime,        
+ @Renglon                   float,        
+ @RenglonSub                int,        
+ @FechaCaducidad            datetime,        
+ @Referencia                varchar(50),        
+ @CteArt                    bit,        
+ @Cliente                   varchar(10),        
+ @EnviarA                   int,        
+ @Direccion                 varchar(100),        
+ @Cp                        varchar(15),        
+ @Delegacion                varchar(100),        
+ @Colonia                   varchar(100),        
+ @Estado                    varchar(100),        
+ @Poblacion                 varchar(100),        
+ @Pais                      varchar(100),        
+ @SATExportacion            varchar(100),        
+ @Subdivision               varchar(100),        
+ @Incoterm                  varchar(100),        
+ @MotivoTraslado            varchar(100),        
+ @TipoOperacion             varchar(100),        
+ @Departamento              varchar(50),        
+ @UsuarioSucursal           int,        
+ @CantidadExcede            float,    
+ @INFORCostoIndirecto       float,    
+ @Agente                    varchar(10),
+ @SubClave	                varchar(20),
+ @TipoComprobante           varchar(20),
+ @Descripcion1              varchar(1000),
+ @GrupoTrabajo              varchar(50),
+ @Autorizacion		        varchar(10)
             ----              
+        
+             
      IF @Accion IN ( 'AFECTAR','VERIFICAR') AND @Modulo IN ('COMS','INV')              
                   
       BEGIN              
@@ -181,10 +186,15 @@ AS BEGIN
               
       END              
               
+              
+     ---              
+              
+              
  IF @Accion IN ( 'AFECTAR','VERIFICAR','AUTORIZAR')                                                                       
                                                             
   BEGIN                                      
-                                        
+                                      
+                                    
 IF @Modulo='GAS'                        
 BEGIN                        
                         
@@ -203,7 +213,10 @@ EXEC MURSPVALIDAGASTOS   @ID,@OK OUTPUT,@OKREF OUTPUT
 END                        
                         
                         
-END                     
+END                        
+                        
+                        
+                        
     ------------------------- SERIE/LOTE ENTRADA COMPRA CALIDAD  ------------------------------------                                 
                                          
   IF @Modulo='COMS'                                           
@@ -222,7 +235,7 @@ END
         
       EXEC MURSPVALIDAENTRADACOMS @ID,@OK OUTPUT,@OKREF OUTPUT         
    END 
-                           
+                                               
   END                                         
                                       
   ------------------------- FIN SERIE/LOTE ENTRADA COMPRA CALIDAD ---------------------------------                           
@@ -230,39 +243,39 @@ END
                                   
                                               
  ------------------------- ALMACEN CERRADO INVENTARIO FISICO  ------------------------------------               
-   IF @Modulo IN ('COMS','INV','VTAS')                                          
+   IF @Modulo IN ('COMS','INV'/*,'VTAS'*/)                                          
                                              
    BEGIN                                          
                                           
-          IF @Modulo='VTAS'                                
-       BEGIN    
+  --        IF @Modulo='VTAS'                                
+  --     BEGIN    
         
-       SELECT @ALM =ALMACEN,@MOV=Mov,@ESTATUS=ESTATUS     
-      FROM Venta     
-  WHERE ID=@ID    
+  --     SELECT @ALM =ALMACEN,@MOV=Mov,@ESTATUS=ESTATUS     
+  --      FROM Venta     
+  --      WHERE ID=@ID    
     
-       SELECT @CERRADO = ISNULL(CERRARALM,0) FROM Alm WHERE Almacen=@ALM                                          
+  --     SELECT @CERRADO = ISNULL(CERRARALM,0) FROM Alm WHERE Almacen=@ALM                                          
                                           
                                                  
-  IF @CERRADO=1  AND @MOV='FACTURA' AND @ESTATUS='SINAFECTAR'                                          
+  --IF @CERRADO=1  AND @MOV='FACTURA' AND @ESTATUS='SINAFECTAR'                                          
                                           
-       SELECT @Ok=666,@OkRef='EL ALMACEN ESTA CERRADO'    
+  --     SELECT @Ok=666,@OkRef='EL ALMACEN ESTA CERRADO'    
     
-    /*JARC 18/12/2025 sustituye al MURSPVALIDAPRECIOSNVK*/    
+  --  /*JARC 18/12/2025 sustituye al MURSPVALIDAPRECIOSNVK*/    
     
-       IF  @MOV='FACTURA' AND @ESTATUS='SINAFECTAR' AND @Ok IS NULL    
-  BEGIN        
-   BEGIN                              
-               EXEC  dbo.xpValidaDescuentoLinea  @ID , @OK OUTPUT, @OKREF OUTPUT                              
-   END    
+  --     IF  @MOV='FACTURA' AND @ESTATUS='SINAFECTAR' AND @Ok IS NULL    
+  --BEGIN        
+  -- BEGIN                              
+  --             EXEC  dbo.xpValidaDescuentoLinea  @ID , @OK OUTPUT, @OKREF OUTPUT                              
+  -- END    
               
-    IF @Ok IS NULL    
+  --  IF @Ok IS NULL    
        
-     BEGIN                                  
-      EXEC MURSPGENERAPLICACIONVTASNAVITEK  @ID             
-     END     
-  END    
-       END                                          
+  --   BEGIN                                  
+  --    EXEC MURSPGENERAPLICACIONVTASNAVITEK  @ID             
+  --   END     
+  --END    
+  --     END                                          
                                           
           IF @Modulo='COMS'                              
        BEGIN                                          
@@ -275,7 +288,7 @@ END
        END                                          
                  IF @Modulo='INV'                                          
        BEGIN                                          
-       SELECT @ALM =ALMACEN,@ALMADESTINO=AlmacenDestino,@ESTATUS=ESTATUS,@MOV=mov FROM INV WHERE ID=@ID                                          
+       SELECT @ALM =ALMACEN,@ALMDESTINO=AlmacenDestino,@ESTATUS=ESTATUS,@MOV=mov FROM INV WHERE ID=@ID                                          
                                           
        SELECT @CERRADO = ISNULL(CERRARALM,0) FROM Alm WHERE Almacen=@ALM                                          
                                           
@@ -283,38 +296,37 @@ END
                                           
        SELECT @Ok=4466,@OkRef='EL ALMACEN ESTA CERRADO'                              
        END                                          
-    
+                                          
+                                          
+                                          
    END                                          
         
   ------------------------ FIN ALMACEN CERRADO INVENTARIO FISICO -----------------------------------                                      
+                                                                
+                                                                
+         
                               
-         IF @MOV IN (select Mov from MovTipo where Modulo='vtas' and SubClave='VTAS.PNVK') AND @ESTATUS='SINAFECTAR'                                                                                                                                          
-
-         BEGIN                       
-   EXEC MURSPORDENADETALLEVTAS @ID         
+--IF @MOV IN (select Mov from MovTipo where Modulo='vtas' and SubClave='VTAS.PNVK') AND @ESTATUS='SINAFECTAR'                                                                                                                                          
+--BEGIN                       
+--   EXEC MURSPORDENADETALLEVTAS @ID         
            
-   EXEC MURSPVALIDAPRECIODESCUENTO  @ID,@OK OUTPUT,@OKREF OUTPUT        
+--   EXEC MURSPVALIDAPRECIODESCUENTO  @ID,@OK OUTPUT,@OKREF OUTPUT        
                                                                               
-         EXEC MURSPVALIDAPESOENPEDIDOS  @ID,@OK OUTPUT,@OKREF OUTPUT                                                                                
+--         EXEC MURSPVALIDAPESOENPEDIDOS  @ID,@OK OUTPUT,@OKREF OUTPUT                                                                                
                                
-   EXEC  MURSPVALIDADUPLICADOSVTAS  @ID,@OK OUTPUT,@OKREF OUTPUT                                                                         
+--   EXEC  MURSPVALIDADUPLICADOSVTAS  @ID,@OK OUTPUT,@OKREF OUTPUT                                                                         
                                        
-   EXEC MURSPAGREGAANEXOSART  @ID                                                                            
-
-
-
-   --EXEC MURSPVALIDAPRECIOSDETALLE  @ID
-    --JARC Vaida Precios con nueva pólitica de precios sustituye MURSPVALIDAPRECIOSDETALLE
-     EXEC nvk_xp_ValidaPreciosDetalle @ID  
-
-   exec MURSPVALIDAPRECIOSDETALLEdir  @id,@usuario,@ok output, @okref  output                         
+--   EXEC MURSPAGREGAANEXOSART  @ID                                                                            
+                                                              
+--   EXEC MURSPVALIDAPRECIOSDETALLE  @ID                                                    
+--   exec MURSPVALIDAPRECIOSDETALLEdir  @id,@usuario,@ok output, @okref  output                         
                          
-   EXEC MURSPCOPIAPRECIOSVTAS  @ID                      
+--   EXEC MURSPCOPIAPRECIOSVTAS  @ID                      
                                               
-   UPDATE  VENTAD                                              
-   SET ListaPrecioDetalle=Instruccion                                              
-   WHERE ID=@ID                                              
-      END                                                                                
+--   UPDATE  VENTAD                                              
+--   SET ListaPrecioDetalle=Instruccion                                              
+--   WHERE ID=@ID                                              
+--      END                                                                                
                            
                                                                      
    -- JARC END                                                                                
@@ -322,7 +334,11 @@ END
                                                                                 
                                                                                                           
   IF  @Modulo = 'COMS'                                                                                                           
-   BEGIN                                                        
+   BEGIN                                        
+                                                                   
+                                                                
+                                                                
+                                                                
     SELECT @MOV=Mov, @ESTATUS = Estatus FROM Compra                                                                                                          
     WHERE @ID = ID                          
                                                                  
@@ -338,7 +354,10 @@ END
               
                                                                 
  END                                                        
-                        
+                                                                
+                                    
+          
+                                                                                           
    IF @Mov LIKE '%Requisicion Imp%'  AND @ESTATUS = 'SINAFECTAR'                                                                                      
       BEGIN                                                                                                          
                                              
@@ -393,7 +412,7 @@ BEGIN
 If @Modulo='GAS'                                                                       
 BEGIN                                                                       
 select @Estatus=Estatus, @Movimiento=V.Mov, @Clave=mt.Clave, @Empresa=v.Empresa, @Sucursal=v.Sucursal,  @CentroCosto=ISNULL(NULLIF(gd.ContUso, ' '), 'NA'),     @Origen=ISNULL(NULLIF(v.Origen, ' '), 'NA')                                                   
-  From Gasto  V                           
+      From Gasto  V                           
 left join GastoD gd on v.ID=gd.ID                     
 left join MovTipo mt on V.Mov=mt.Mov and mt.Modulo='GAS'                                                                                               
 where v.ID=@ID                                                                                            
@@ -424,7 +443,7 @@ BEGIN
 --If @Modulo='VTAS'    
 --BEGIN                                          
 --select @Estatus=Estatus, @Movimiento=V.Mov, @Clave=mt.Clave, @Empresa=v.Empresa, @Sucursal=v.Sucursal,  @CentroCosto=ISNULL(NULLIF(vd.ContUso, ' '), 'NA'),    @Origen=ISNULL(NULLIF(v.Origen, ' '), 'NA')                                                  
---From Venta  V                                            
+ --From Venta  V                                            
 --left join VentaD vd on v.ID=vd.ID                                                                                                          
 --left join MovTipo mt on V.Mov=mt.Mov and mt.Modulo='VTAS'                                                                                                          
 --where v.ID=@ID                            
@@ -477,12 +496,15 @@ END
                     
     IF @Movimiento IN ('REASIGNACION' ,'REASIGNACION T')AND @ESTATUS='SINAFECTAR'          
     BEGIN             
+             
+             
       UPDATE CXC                           
       SET FechaEmision=dbo.fnFechaSinHora(GETDATE())                          
       WHERE ID=@ID                          
                           
     END             
-
+        
+                      
   If @Movimiento='Cobro Cte' and @ESTATUS='SINAFECTAR'                                                                                                      
   BEGIN                                                     
    IF @CtaDinero='NA'                                                                                    
@@ -515,7 +537,8 @@ SELECT TOP 1 @Agente = e1.Agente
  END    
     
 end     
-
+     
+    
 ---------------------------COMS--CC-(AO)--------------                               
 -- IF @Accion='Afectar'                                                                                                
 -- BEGIN                                                                                                           
@@ -538,7 +561,7 @@ end
 ---------------------------------------------Fin Validación------------------------------                                                               
  /*******Inicio Copiar MovId Orden Compra********/                                                                                   
 IF  @Modulo = 'COMS'                                                                                
-   BEGIN                     
+   BEGIN                                                                                                          
     SELECT @MOV=Mov, @ESTATUS = Estatus FROM Compra                                                                                                          
 WHERE @ID = ID                                                                             
                         
@@ -580,13 +603,13 @@ WHERE @ID = ID
   END                                                             
   END                                                          
   ------------------------- FIN VALIDACION ART CHECK SE COMPRA ------------------------------------                                   
-  --------------------------------------- TIPO ISRRESICO ------------------------------------------                     
+  --------------------------------------- TIPO ISRRESICO ------------------------------------------                                  
   IF @Modulo = 'COMS'                                            
   BEGIN                                             
                                             
   SELECT @Prov = Proveedor  FROM Compra WHERE  ID=@ID                                      
       
-  DECLARE @REGIMENFIS VARCHAR (30) , @lenrfc  int             
+  DECLARE @REGIMENFIS varchar (30) , @lenrfc  int             
     
   SELECT @REGIMENFIS=ISNULL (FiscalRegimen,'666'),@lenrfc=len(isnull(rfc,'na')) FROM Prov WHERE Proveedor=@PROV                                            
                                             
@@ -628,63 +651,64 @@ IF @REGIMENFIS = 626       and @lenrfc=13
   IF @Modulo in ('VTAS','COMS','INV') AND @Ok IS NULL        
   BEGIN        
         
-    IF @Modulo = 'VTAS' AND @Accion in ('VERIFICAR', 'AFECTAR')        
-    BEGIN        
-      SELECT @Cliente = Cliente, @EnviarA = EnviarA, @Mov = Mov        
-        FROM Venta        
-       WHERE ID = @ID        
+--    IF @Modulo = 'VTAS' AND @Accion in ('VERIFICAR', 'AFECTAR')        
+--    BEGIN        
+--      SELECT @Cliente = Cliente, @EnviarA = EnviarA, @Mov = Mov        
+--        FROM Venta        
+--       WHERE ID = @ID        
         
-      IF @Mov IN ('Carta Porte Traslado')        
-      BEGIN        
-        IF @EnviarA IS NULL        
-          SELECT @Ok = 10060, @OkRef = 'Falta capturar la Sucursal del Cliente'        
-        ELSE        
-        BEGIN        
-          SELECT @Direccion = ISNULL(Direccion, ''), @CP = ISNULL(CodigoPostal, ''), @Delegacion = ISNULL(Delegacion, ''), @Estado = ISNULL(Estado, ''), @Poblacion = ISNULL(Poblacion, ''), @Pais = ISNULL(Pais, '')        
-            FROM CteEnviarA        
-           WHERE Cliente = @Cliente        
-             AND ID = @EnviarA        
+--      IF @Mov IN ('Carta Porte Traslado')        
+--      BEGIN        
+--        IF @EnviarA IS NULL        
+--          SELECT @Ok = 10060, @OkRef = 'Falta capturar la Sucursal del Cliente'        
+--        ELSE        
+--        BEGIN        
+--          SELECT @Direccion = ISNULL(Direccion, ''), @CP = ISNULL(CodigoPostal, ''), @Delegacion = ISNULL(Delegacion, ''), @Estado = ISNULL(Estado, ''), @Poblacion = ISNULL(Poblacion, ''), @Pais = ISNULL(Pais, '')        
+--            FROM CteEnviarA        
+--           WHERE Cliente = @Cliente        
+--             AND ID = @EnviarA        
         
-          IF @Direccion = '' OR @CP = '' OR @Delegacion = '' OR @Estado = '' OR @Poblacion = '' OR @Pais = ''        
-            SELECT @Ok = 10060, @OkRef = 'Falta capturar la Direccion o Código Postal o Delegación o Estado o Población o País de la Sucursal del Cliente'        
-        END        
-      END        
+--          IF @Direccion = '' OR @CP = '' OR @Delegacion = '' OR @Estado = '' OR @Poblacion = '' OR @Pais = ''        
+--            SELECT @Ok = 10060, @OkRef = 'Falta capturar la Direccion o Código Postal o Delegación o Estado o Población o País de la Sucursal del Cliente'        
+--        END        
+--      END        
         
-      IF @Mov IN ('PSE')        
-      BEGIN        
-        SELECT @SATExportacion = NULLIF(RTRIM(SATExportacion), ''),        
-                @Subdivision    = NULLIF(RTRIM(Subdivision), ''),        
-                @Incoterm       = NULLIF(RTRIM(Incoterm), ''),        
-                @MotivoTraslado = NULLIF(RTRIM(MotivoTraslado), ''),        
-                @TipoOperacion  = NULLIF(RTRIM(TipoOperacion), '')        
-          FROM VentaCFDIRelacionado        
-          WHERE ID = @ID        
+--      IF @Mov IN ('PSE')        
+--      BEGIN        
+--        SELECT @SATExportacion = NULLIF(RTRIM(SATExportacion), ''),        
+--                @Subdivision    = NULLIF(RTRIM(Subdivision), ''),        
+--                @Incoterm       = NULLIF(RTRIM(Incoterm), ''),        
+--                @MotivoTraslado = NULLIF(RTRIM(MotivoTraslado), ''),        
+--                @TipoOperacion  = NULLIF(RTRIM(TipoOperacion), '')        
+--          FROM VentaCFDIRelacionado        
+--          WHERE ID = @ID        
         
-        IF @SATExportacion IS NULL OR @Subdivision IS NULL OR @Incoterm IS NULL OR @MotivoTraslado IS NULL OR @TipoOperacion IS NULL        
-          SELECT @Ok = 10060, @OkRef = 'Falta capturar Incoterm o SubDivision o Motivo Traslado o Tipo Operación o Sat Exportación'        
-      END        
-/*     
-Dirección        
-CP        
-Delegación o municipio        
-Colonia        
-Estado        
-Población en caso de que no tenga dato en el catálogo del SAT, que acepte texto capturado        
-País        
+--        IF @SATExportacion IS NULL OR @Subdivision IS NULL OR @Incoterm IS NULL OR @MotivoTraslado IS NULL OR @TipoOperacion IS NULL        
+--          SELECT @Ok = 10060, @OkRef = 'Falta capturar Incoterm o SubDivision o Motivo Traslado o Tipo Operación o Sat Exportación'        
+--      END        
+--/*     
+--Dirección        
+--CP        
+--Delegación o municipio        
+--Colonia        
+--Estado        
+--Población en caso de que no tenga dato en el catálogo del SAT, que acepte texto capturado        
+--País        
         
-*/        
+--*/        
         
               
-    END        
+--    END        
             
     EXEC spMovInfo @ID, @Modulo, @Empresa = @Empresa OUTPUT, @MovTipo = @MovClave OUTPUT, @FechaEmision = @FechaEmision OUTPUT, @Mov = @Mov output                  
-    IF (SELECT isnull(CartaPorte, 0) FROM MovTipo where Modulo = @Modulo AND Mov = @Mov) = 1  AND (SELECT CFD_tipoDeComprobante FROM MovTipo where Modulo = @Modulo AND Mov = @Mov)='traslado' AND EXISTS (SELECT TOP 1 ID FROM CFDCartaPorteID WHERE Modulo =@Modulo AND ModuloID = @ID)
+    IF (SELECT isnull(CartaPorte, 0) FROM MovTipo where Modulo = @Modulo AND Mov = @Mov) = 1  
+    AND (SELECT CFD_tipoDeComprobante FROM MovTipo where Modulo = @Modulo AND Mov = @Mov)='traslado' 
+    AND EXISTS (SELECT TOP 1 ID FROM CFDCartaPorteID WHERE Modulo = @Modulo AND ModuloID = @ID)                  
       EXEC spCFDCartaPorteValidarInfo @Modulo, @ID, @Ok = @Ok output,  @OkRef = @OkRef output                  
   END                                
   --Esta integracion es para aquellos clientes que dan 100% de Descuento en los Articulos del detalle de Ventas, y sirve para insertar en la tabla de paso el Objeto impuesto 04 para que lo tome de ahi el xml                  
-  IF @Modulo = 'VTAS' AND @Accion = 'AFECTAR' AND (SELECT isnull(CFD_tipoDeComprobante, '') FROM MovTipo where Modulo = @Modulo AND Mov = @Mov)<>''                  
-    EXEC spMovObjetoImpuesto @ID, 'VTAS', 1                  
-        
+  --IF @Modulo = 'VTAS' AND @Accion = 'AFECTAR' AND (SELECT isnull(CFD_tipoDeComprobante, '') FROM MovTipo where Modulo = @Modulo AND Mov = @Mov)<>''                  
+  --  EXEC spMovObjetoImpuesto @ID, 'VTAS', 1                   
 --RETURN        
 --end        
         
@@ -722,69 +746,69 @@ País
     END        
   END        
         
-  IF @Modulo = 'VTAS' AND @Accion IN ('AFECTAR', 'VERIFICAR') AND @Ok IS NULL        
-  BEGIN        
-    EXEC spMovInfo @ID, @Modulo, @MovTipo = @MovTipo OUTPUT, @Empresa = @Empresa OUTPUT        
-    IF @MovTipo = 'VTAS.VP'        
-    BEGIN        
-      SELECT @Articulo = NULL        
+  --IF @Modulo = 'VTAS' AND @Accion IN ('AFECTAR', 'VERIFICAR') AND @Ok IS NULL        
+  --BEGIN        
+  --  EXEC spMovInfo @ID, @Modulo, @MovTipo = @MovTipo OUTPUT, @Empresa = @Empresa OUTPUT        
+  --  IF @MovTipo = 'VTAS.VP'        
+  --  BEGIN        
+  --    SELECT @Articulo = NULL        
         
-      SELECT @Articulo = MIN(d.Articulo), @Referencia = MIN(e.Mov + ' ' + e.MovID)        
-        FROM VentaD d        
-        JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = @Empresa        
-        JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
-        JOIN TMA t ON m.DID = t.ID AND t.Estatus = 'PENDIENTE'        
-        JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
-       WHERE d.ID = @ID        
-         AND e.Estatus = 'PENDIENTE'        
-         AND ISNULL(td.CantidadPendiente, 0) > 0        
-         AND e.Mov IN ('PET', 'PSE', 'PST')        
+  --    SELECT @Articulo = MIN(d.Articulo), @Referencia = MIN(e.Mov + ' ' + e.MovID)        
+  --      FROM VentaD d        
+  --      JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = @Empresa        
+  --      JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
+  --      JOIN TMA t ON m.DID = t.ID AND t.Estatus = 'PENDIENTE'        
+  --      JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
+  --     WHERE d.ID = @ID        
+  --       AND e.Estatus = 'PENDIENTE'        
+  --       AND ISNULL(td.CantidadPendiente, 0) > 0        
+  --       AND e.Mov IN ('PET', 'PSE', 'PST')        
         
-      IF @Articulo IS NOT NULL        
-        SELECT @OK = 10060, @OkRef = 'El Movimiento ' + @Referencia + ' tiene Orden Surtido Pendiente, debe cancelarla primero'        
-      ELSE     
-      BEGIN        
-        SELECT @CteArt = ISNULL(CteArt, 0)        
-          FROM Usuario         
-         WHERE Usuario = @Usuario        
+  --    IF @Articulo IS NOT NULL        
+  --      SELECT @OK = 10060, @OkRef = 'El Movimiento ' + @Referencia + ' tiene Orden Surtido Pendiente, debe cancelarla primero'        
+  --    ELSE     
+  --    BEGIN        
+  --      SELECT @CteArt = ISNULL(CteArt, 0)        
+  --        FROM Usuario         
+  --       WHERE Usuario = @Usuario        
         
-        IF ISNULL(@CteArt, 0) = 0        
-        BEGIN        
-          SELECT @Articulo = MIN(d.Articulo), @Referencia = MIN(e.Mov + ' ' + e.MovID)        
-            FROM VentaD d        
-            JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = @Empresa        
-            JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
-            JOIN TMA t ON m.DID = t.ID AND t.Estatus IN ('PENDIENTE', 'CONCLUIDO')        
-            JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
-            JOIN MovFlujo m2 ON m.DID = m2.OID AND m2.OModulo = 'TMA' AND m2.DModulo = 'TMA'        
-            JOIN TMA t2 ON m2.DID = t2.ID AND t2.Estatus in ('PENDIENTE', 'CONCLUIDO')        
-            JOIN TMAD td2 on t2.ID = td2.ID AND d.Articulo = td2.Articulo        
-           WHERE d.ID = @ID        
-             AND e.Estatus = 'PENDIENTE'        
+  --      IF ISNULL(@CteArt, 0) = 0        
+  --      BEGIN        
+  --        SELECT @Articulo = MIN(d.Articulo), @Referencia = MIN(e.Mov + ' ' + e.MovID)        
+  --          FROM VentaD d        
+  --          JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = @Empresa        
+  --          JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
+  --          JOIN TMA t ON m.DID = t.ID AND t.Estatus IN ('PENDIENTE', 'CONCLUIDO')        
+  --          JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
+  --          JOIN MovFlujo m2 ON m.DID = m2.OID AND m2.OModulo = 'TMA' AND m2.DModulo = 'TMA'        
+  --          JOIN TMA t2 ON m2.DID = t2.ID AND t2.Estatus in ('PENDIENTE', 'CONCLUIDO')        
+  --          JOIN TMAD td2 on t2.ID = td2.ID AND d.Articulo = td2.Articulo        
+  --         WHERE d.ID = @ID        
+  --           AND e.Estatus = 'PENDIENTE'        
         
-          IF @Articulo IS NOT NULL        
-            SELECT @OK = 10060, @OkRef = 'El Movimiento ' + @Referencia + ' ya tiene surtidos'        
-        END        
-      END        
+  --        IF @Articulo IS NOT NULL        
+  --          SELECT @OK = 10060, @OkRef = 'El Movimiento ' + @Referencia + ' ya tiene surtidos'        
+  --      END        
+  --    END        
         
-      IF @Ok IS NULL        
-      BEGIN        
-        SELECT @Departamento = Departamento, @UsuarioSucursal = Sucursal FROM Usuario WHERE Usuario = @Usuario        
+  --    IF @Ok IS NULL        
+  --    BEGIN        
+  --      SELECT @Departamento = Departamento, @UsuarioSucursal = Sucursal FROM Usuario WHERE Usuario = @Usuario        
         
-        --IF ISNULL(@Departamento, '') <> 'ALMACEN PRODUCTO TERMINADO'        
-        IF NOT (ISNULL(@Departamento, '') = 'ALMACEN PRODUCTO TERMINADO' AND @UsuarioSucursal = 3)        
-          IF EXISTS(SELECT t.ID        
-            FROM VentaD d        
-            JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = 'NVK'        
-            JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
-            JOIN TMA t ON m.DID = t.ID AND t.Estatus in ('PENDIENTE', 'CONCLUIDO')        
-            JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
-           WHERE d.ID = @ID        
-             AND e.Estatus = 'PENDIENTE')        
-            SELECT @Ok = 10060, @OkRef = 'Usuario restringido'        
-      END        
-    END -- VP              
-  END        
+  --      --IF ISNULL(@Departamento, '') <> 'ALMACEN PRODUCTO TERMINADO'        
+  --      IF NOT (ISNULL(@Departamento, '') = 'ALMACEN PRODUCTO TERMINADO' AND @UsuarioSucursal = 3)        
+  --        IF EXISTS(SELECT t.ID        
+  --          FROM VentaD d        
+  --          JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = 'NVK'        
+  --          JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
+  --          JOIN TMA t ON m.DID = t.ID AND t.Estatus in ('PENDIENTE', 'CONCLUIDO')        
+  --          JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
+  --         WHERE d.ID = @ID        
+  --           AND e.Estatus = 'PENDIENTE')        
+  --          SELECT @Ok = 10060, @OkRef = 'Usuario restringido'        
+  --    END        
+  --  END -- VP              
+  --END        
         
   IF @Modulo = 'INV' AND @Accion IN ('VERIFICAR', 'AFECTAR') AND @Ok IS NULL        
   BEGIN        
@@ -962,7 +986,7 @@ País
 --      HAVING ISNULL(os.Cantidad, 0) < SUM(ISNULL(ps.Cantidad, 0)) + SUM(ISNULL(s.Cantidad, 0))      
 */        
       SELECT @Articulo = os.Articulo, @CantidadExcede = SUM(ISNULL(ps.Cantidad, 0)) + SUM(ISNULL(s.Cantidad, 0)) - ISNULL(os.Cantidad, 0)        
-        FROM #OrdenSurtido os     
+        FROM #OrdenSurtido os         
         JOIN #PorSurtir ps ON os.Renglon = ps.Renglon AND os.Articulo = ps.Articulo        
         JOIN #Surtido s ON os.Renglon = s.Renglon AND os.Articulo = s.Articulo        
        GROUP BY os.Renglon, os.Articulo, ISNULL(os.Cantidad, 0)        
@@ -983,9 +1007,293 @@ END
       EXEC xpInmersionCostoNVK @Modulo, @ID    
     END    
   END    
+
+  
+IF @Modulo = 'VTAS' AND @Accion IN ('AFECTAR','VERIFICAR') AND @Ok IS NULL
+BEGIN
+SELECT @Alm                 =v.Almacen,
+        @Mov                =v.Mov,
+        @Estatus            =v.Estatus,
+        @Cerrado            =ISNULL(a.CerrarAlm,0),
+        @Autorizacion		= COALESCE(v.Autorizacion,''),
+        @Clave              =mt.Clave,
+        @SubClave           =SubClave,
+        @Cliente            =v.Cliente, 
+        @EnviarA            =v.EnviarA,
+        @TipoComprobante    =ISNULL(CFD_tipoDeComprobante, ''),
+        @GrupoTrabajo       =u.GrupoTrabajo,
+        @OrigenTipo         =v.OrigenTipo
+  FROM Venta            v
+  LEFT JOIN Alm         a       ON v.Almacen=a.Almacen
+  LEFT JOIN MovTipo     mt      ON mt.Mov=@Mov AND mt.Modulo = @Modulo
+  LEFT JOIN Usuario     u       ON u.Usuario = v.Usuario
+ WHERE ID=@ID    
+
+--Esta integracion es para aquellos clientes que dan 100% de Descuento en los Articulos del detalle de Ventas, 
+--y sirve para insertar en la tabla de paso el Objeto impuesto 04 para que lo tome de ahi el xml
+  IF @TipoComprobante <> ''
+    EXEC spMovObjetoImpuesto @ID, 'VTAS', 1
+                                                 
+  IF @Mov='Factura' AND @Estatus='SINAFECTAR'
+  BEGIN
+  IF @Cerrado=1
+
+       SELECT @Ok=10065,@OkRef='El Almacen esta Cerrado'
+
+       IF @Ok IS NULL
+
+        BEGIN
+            /*JARC 18/12/2025 sustituye al MURSPVALIDAPRECIOSNVK*/ 
+          EXEC  dbo.xpValidaDescuentoLinea  @ID , @OK OUTPUT, @OKREF OUTPUT                              
+        END    
+              
+            IF @Ok IS NULL    
+             BEGIN                                  
+              EXEC MURSPGENERAPLICACIONVTASNAVITEK  @ID             
+             END 
+  END
+
+    IF @Clave = 'VTAS.P' AND @SubClave = 'VTAS.PNVK' AND @Estatus='SINAFECTAR' AND @Ok IS NULL
+
+    BEGIN
+       EXEC MURSPORDENADETALLEVTAS @ID         
+           
+       EXEC MURSPVALIDAPRECIODESCUENTO  @ID,@OK OUTPUT,@OKREF OUTPUT
+       
+       
+
+       IF @OK IS NULL
+
+       EXEC MURSPVALIDAPESOENPEDIDOS  @ID,@OK OUTPUT,@OKREF OUTPUT --Valida cantidades en SDK mostrar validación de agente directamente
+
+       --EXEC  MURSPVALIDADUPLICADOSVTAS  @ID,@OK OUTPUT,@OKREF OUTPUT
+       IF @OK IS NULL
+       BEGIN
+          SELECT TOP 1 @Articulo = d.Articulo, @Descripcion1 = T.Descripcion1
+            FROM VentaD D 
+            LEFT OUTER JOIN Art T ON D.Articulo=T.Articulo
+           WHERE ID=@ID
+           GROUP BY D.Articulo,T.Descripcion1
+          HAVING COUNT(D.Articulo) >1
+
+          IF @Articulo IS NOT NULL
+          BEGIN
+             SELECT @OK = 10245,@OkRef = 'El Articulo '+@Articulo+' '+@Descripcion1+' se encuentra Duplicado'
+          END
+        END
+
+       --EXEC MURSPAGREGAANEXOSART  @ID
+
+       IF @Ok IS NULL
+       BEGIN
+            UPDATE Venta
+            SET Comentarios=C.Comentarios
+            FROM Venta          V
+            LEFT JOIN Cte       c       ON c.Cliente=v.Cliente 
+            WHERE  NULLIF(CONVERT (varchar(MAX),v.Comentarios  ),'') IS NULL 
+            AND V.ID=@ID           
+          
+      
+            UPDATE Venta
+            SET Observaciones=substring(C.CRMInfluencia,1,100)
+            FROM Venta          v
+            LEFT JOIN Cte       c       ON c.Cliente=v.Cliente 
+            WHERE  V.ID=@ID        
+            AND NULLIF(V.Observaciones,'') IS NULL      
+            --select comentarios from cte where cliente='4050'     select * from venta where id=2729      
+          
+                
+            UPDATE Venta                
+            SET ComentarioVenta=T.ComentarioS,CLASE='CLICHE'
+            FROM Venta a
+            LEFT JOIN VentaD D          ON a.Id = d.Id
+            LEFT JOIN Art    T          ON D.Articulo=T.Articulo
+            WHERE T.Comentarios IS NOT NULL
+            AND D.ID=@ID
+            --AND  NULLIF(CONVERT(VARCHAR(MAX),A.Comentarios),'') IS NULL                
+            AND D.Articulo LIKE '_l%'
+            AND ISNULL(A.Clase,'') <> 'CLICHE'
+       END
+
+       --EXEC MURSPVALIDAPRECIOSDETALLE  @ID
+       --JARC Vaida Precios con nueva pólitica de precios sustituye MURSPVALIDAPRECIOSDETALLE
+       ;WITH VentaBase AS (
+        SELECT v.id, ntcca.Descuento, C.ListaPreciosEsp, vd.Articulo,
+               CASE 
+                   WHEN C.ListaPreciosEsp = '(Precio Lista)' THEN a.PrecioLista
+                   WHEN C.ListaPreciosEsp = '(Precio 1)' THEN a.PrecioLista
+                   WHEN C.ListaPreciosEsp = '(Precio 2)' THEN a.Precio2
+                   WHEN C.ListaPreciosEsp = '(Precio 3)' THEN a.Precio3
+                   WHEN C.ListaPreciosEsp = '(Precio 4)' THEN a.Precio4
+                   WHEN C.ListaPreciosEsp = '(Precio 5)' THEN a.Precio5
+                   WHEN C.ListaPreciosEsp = '(Precio 6)' THEN a.Precio6
+                   WHEN C.ListaPreciosEsp = '(Precio 7)' THEN a.Precio7
+                   WHEN C.ListaPreciosEsp = '(Precio 8)' THEN a.Precio8
+                   ELSE NULL 
+               END AS PrecioLista
+        FROM Venta v
+        JOIN VENTAD vd ON v.ID = vd.ID
+        LEFT JOIN nvk_tb_CuotasClientesAnual ntcca ON v.Cliente = ntcca.Cliente AND ntcca.Ejercicio = YEAR(v.FechaEmision)
+        LEFT JOIN Cte c ON c.Cliente = v.Cliente
+        LEFT JOIN Art a ON a.Articulo = vd.Articulo 
+        WHERE v.ID = @Id
+    ),
+    Diferencia AS (
+        SELECT vd.Id,
+                vb.Articulo,
+                vd.Renglon,
+                vd.RenglonID,
+               (vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100) AS PrecioMinimo,
+               (vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100) AS PrecioVenta
+        FROM VentaBase vb
+        LEFT JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
+        --JOIN Art a ON a.Articulo = vb.Articulo
+    )
+    
+    --SELECT * FROM Diferencia where PrecioVenta < PrecioMinimo
+
+    UPDATE VentaD set DescripcionExtra = 'Por Debajo del Precio Permitido '+ (CONVERT(VARCHAR(10),(PrecioMinimo-PrecioVenta)))
+    from VentaD vd, Diferencia d
+    where vd.ID = d.ID 
+    AND vd.Renglon=d.Renglon
+    and vd.RenglonID = d.RenglonID
+    and PrecioVenta < PrecioMinimo
+
+       EXEC MURSPVALIDAPRECIOSDETALLEdir  @id,@GrupoTrabajo,@Mov,@SubClave,@Ok OUTPUT, @OkRef  OUTPUT
+
+       IF @OK IS NULL AND @Autorizacion = ''
+
+       EXEC MURSPCOPIAPRECIOSVTAS  @Id,@Mov,@Estatus,@OrigenTipo
+
+
+       EXEC nvk_xp_ValidaPreciosDetalle @ID,@Ok OUTPUT, @OkRef OUTPUT
+
+       IF @Ok = 20305
+       BEGIN
+             UPDATE Venta SET Autorizacion = @OK WHERE ID = @Id
+       END
+
+       IF @Ok IS NULL
+
+       UPDATE  VENTAD                                              
+       SET ListaPrecioDetalle=Instruccion                                              
+       WHERE ID=@ID
+   
+    END  
+        
+      IF @Mov IN ('Carta Porte Traslado') AND @Ok IS NULL
+      BEGIN        
+        
+        IF @EnviarA IS NULL        
+          SELECT @Ok = 10060, @OkRef = 'Falta capturar la Sucursal del Cliente'        
+            ELSE        
+                BEGIN        
+                  SELECT @Direccion = ISNULL(Direccion, ''), 
+                            @CP = ISNULL(CodigoPostal, ''), 
+                            @Delegacion = ISNULL(Delegacion, ''), 
+                            @Estado = ISNULL(Estado, ''), 
+                            @Poblacion = ISNULL(Poblacion, ''), 
+                            @Pais = ISNULL(Pais, '')
+                    FROM CteEnviarA
+                   WHERE Cliente = @Cliente
+                     AND ID = @EnviarA
+                  
+                  IF @Direccion = '' OR @CP = '' OR @Delegacion = '' OR @Estado = '' OR @Poblacion = '' OR @Pais = ''        
+                    SELECT @Ok = 10060, @OkRef = 'Falta capturar la Direccion o Código Postal o Delegación o Estado o Población o País de la Sucursal del Cliente'        
+                END
+      END        
+        
+      IF @Mov IN ('PSE') AND @Ok IS NULL
+      BEGIN        
+        SELECT @SATExportacion = NULLIF(RTRIM(SATExportacion), ''),        
+                @Subdivision    = NULLIF(RTRIM(Subdivision), ''),        
+                @Incoterm       = NULLIF(RTRIM(Incoterm), ''),        
+                @MotivoTraslado = NULLIF(RTRIM(MotivoTraslado), ''),        
+                @TipoOperacion  = NULLIF(RTRIM(TipoOperacion), '')        
+          FROM VentaCFDIRelacionado        
+          WHERE ID = @ID        
+        
+        IF @SATExportacion IS NULL OR @Subdivision IS NULL OR @Incoterm IS NULL OR @MotivoTraslado IS NULL OR @TipoOperacion IS NULL        
+          SELECT @Ok = 10060, @OkRef = 'Falta capturar Incoterm o SubDivision o Motivo Traslado o Tipo Operación o Sat Exportación'        
+      END        
+/*     
+Dirección        
+CP        
+Delegación o municipio        
+Colonia        
+Estado        
+Población en caso de que no tenga dato en el catálogo del SAT, que acepte texto capturado        
+País        
+        
+*/        
+
+    IF @Clave = 'VTAS.VP' AND @Ok IS NULL        
+    BEGIN        
+      SELECT @Articulo = NULL        
+        
+      SELECT @Articulo = MIN(d.Articulo), @Referencia = MIN(e.Mov + ' ' + e.MovID)        
+        FROM VentaD d        
+        JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = @Empresa        
+        JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
+        JOIN TMA t ON m.DID = t.ID AND t.Estatus = 'PENDIENTE'        
+        JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
+       WHERE d.ID = @ID        
+         AND e.Estatus = 'PENDIENTE'        
+         AND ISNULL(td.CantidadPendiente, 0) > 0        
+         AND e.Mov IN ('PET', 'PSE', 'PST')        
+        
+      IF @Articulo IS NOT NULL        
+        SELECT @OK = 10060, @OkRef = 'El Movimiento ' + @Referencia + ' tiene Orden Surtido Pendiente, debe cancelarla primero'        
+      ELSE     
+      BEGIN        
+        SELECT @CteArt = ISNULL(CteArt, 0)        
+          FROM Usuario         
+         WHERE Usuario = @Usuario        
+        
+        IF ISNULL(@CteArt, 0) = 0        
+        BEGIN        
+          SELECT @Articulo = MIN(d.Articulo), @Referencia = MIN(e.Mov + ' ' + e.MovID)        
+            FROM VentaD d        
+            JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = @Empresa        
+            JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
+            JOIN TMA t ON m.DID = t.ID AND t.Estatus IN ('PENDIENTE', 'CONCLUIDO')        
+            JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
+            JOIN MovFlujo m2 ON m.DID = m2.OID AND m2.OModulo = 'TMA' AND m2.DModulo = 'TMA'        
+            JOIN TMA t2 ON m2.DID = t2.ID AND t2.Estatus in ('PENDIENTE', 'CONCLUIDO')        
+            JOIN TMAD td2 on t2.ID = td2.ID AND d.Articulo = td2.Articulo        
+           WHERE d.ID = @ID        
+             AND e.Estatus = 'PENDIENTE'        
+        
+          IF @Articulo IS NOT NULL        
+            SELECT @OK = 10060, @OkRef = 'El Movimiento ' + @Referencia + ' ya tiene surtidos'        
+        END        
+      END        
+        
+      IF @Ok IS NULL        
+      BEGIN        
+        SELECT @Departamento = Departamento, @UsuarioSucursal = Sucursal FROM Usuario WHERE Usuario = @Usuario        
+        
+        --IF ISNULL(@Departamento, '') <> 'ALMACEN PRODUCTO TERMINADO'        
+        IF NOT (ISNULL(@Departamento, '') = 'ALMACEN PRODUCTO TERMINADO' AND @UsuarioSucursal = 3)        
+          IF EXISTS(SELECT t.ID        
+            FROM VentaD d        
+            JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = 'NVK'        
+            JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
+            JOIN TMA t ON m.DID = t.ID AND t.Estatus in ('PENDIENTE', 'CONCLUIDO')        
+            JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
+           WHERE d.ID = @ID        
+             AND e.Estatus = 'PENDIENTE')        
+            SELECT @Ok = 10060, @OkRef = 'Usuario restringido'        
+      END        
+    END -- VP              
+
+
+
+END --FIN VENTAS
+
     
   RETURN    
-END 
+END
 GO
 /******************************************* xpDespuesAfectar  **********************************************/
 IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'xpDespuesAfectar')
@@ -1406,3 +1714,4 @@ SELECT @RenglonID = COUNT(vd.RenglonID)
             EXEC spAfectar @Modulo, @IdGenerado, 'AFECTAR', 'Todo', NULL, @Usuario
 RETURN
 END
+
