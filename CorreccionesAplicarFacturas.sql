@@ -50,6 +50,7 @@ DROP PROCEDURE nvk_xp_ValidaPreciosDetalle
 GO
 CREATE PROC nvk_xp_ValidaPreciosDetalle  
     @Id                 int,
+    @Mov                varchar(20),
     @OK                 int output,
     @OkRef              varchar(255) output
 AS
@@ -99,7 +100,7 @@ DECLARE
        AND vd.RenglonID = d.RenglonID
        AND PrecioVenta < PrecioMinimo
 
-       IF @Articulo IS NOT NULL
+       IF @Articulo IS NOT NULL AND @Mov <> 'Cotizacion'
        BEGIN
        SELECT @OK = 20305,@OkRef = 'El artículo '+TRIM(@Articulo)+' no cubre el precio minimo'
        END
@@ -1024,7 +1025,6 @@ SELECT @Alm                 =v.Almacen,
         @Mov                =v.Mov,
         @Estatus            =v.Estatus,
         @Cerrado            =ISNULL(a.CerrarAlm,0),
-        @Autorizacion		= COALESCE(v.Autorizacion,''),
         @Clave              =mt.Clave,
         @SubClave           =SubClave,
         @Cliente            =v.Cliente, 
@@ -1156,30 +1156,29 @@ SELECT @Alm                 =v.Almacen,
                (vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100) AS PrecioVenta
         FROM VentaBase vb
         LEFT JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
-        --JOIN Art a ON a.Articulo = vb.Articulo
     )
-    
-    --SELECT * FROM Diferencia where PrecioVenta < PrecioMinimo
 
-    UPDATE VentaD set DescripcionExtra = 'Por Debajo del Precio Permitido '+ (CONVERT(VARCHAR(10),(PrecioMinimo-PrecioVenta)))
-    from VentaD vd, Diferencia d
-    where vd.ID = d.ID 
-    AND vd.Renglon=d.Renglon
-    and vd.RenglonID = d.RenglonID
-    and PrecioVenta < PrecioMinimo
+    UPDATE vd
+       SET DescripcionExtra = 
+      CASE WHEN d.PrecioVenta < d.PrecioMinimo THEN 'Por Debajo del Precio Permitido '+ (CONVERT(VARCHAR(10),(PrecioMinimo-PrecioVenta))) ELSE  NULL END
+      FROM VentaD vd
+      JOIN Diferencia d ON vd.ID = d.ID 
+     WHERE vd.Renglon=d.Renglon
+       AND vd.RenglonID = d.RenglonID
+     --AND PrecioVenta < PrecioMinimo
 
        EXEC MURSPVALIDAPRECIOSDETALLEdir  @id,@GrupoTrabajo,@Mov,@SubClave,@Ok OUTPUT, @OkRef  OUTPUT
 
-       IF @OK IS NULL AND @Autorizacion = ''
+       IF @OK IS NULL --AND @Autorizacion = ''
 
        EXEC MURSPCOPIAPRECIOSVTAS  @Id,@Mov,@Estatus,@OrigenTipo
 
 
-       EXEC nvk_xp_ValidaPreciosDetalle @ID,@Ok OUTPUT, @OkRef OUTPUT
+       EXEC nvk_xp_ValidaPreciosDetalle @ID,@Mov,@Ok OUTPUT, @OkRef OUTPUT
 
        IF @Ok = 20305
        BEGIN
-             UPDATE Venta SET Autorizacion = @OK WHERE ID = @Id
+             UPDATE Venta SET Mensaje = @OK WHERE ID = @Id
        END
 
        IF @Ok IS NULL
@@ -1305,86 +1304,104 @@ END --FIN VENTAS
 END
 GO
 /******************************************* xpDespuesAfectar  **********************************************/
-IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'xpDespuesAfectar')
-DROP PROCEDURE [dbo].[xpDespuesAfectar]
+IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='xpDespuesAfectar')
+DROP PROC [dbo].[xpDespuesAfectar]
 GO
 CREATE PROCEDURE [dbo].[xpDespuesAfectar]      
-@Modulo             char(5),                          
-@ID                 int,                          
-@Accion             char(20),                          
-@Base               char(20),                          
-@GenerarMov         char(20),                          
-@Usuario            char(10),                          
-@SincroFinal        bit,                          
-@EnSilencio         bit,                          
-@Ok                 int      OUTPUT,                          
-@OkRef              varchar(255) OUTPUT,                          
-@FechaRegistro      datetime                           
+@Modulo    char(5),                          
+@ID            int,                          
+@Accion    char(20),                          
+@Base    char(20),                          
+@GenerarMov   char(20),                          
+@Usuario    char(10),                          
+@SincroFinal   bit,                          
+@EnSilencio   bit,                          
+@Ok            int      OUTPUT,                          
+@OkRef         varchar(255) OUTPUT,                          
+@FechaRegistro datetime                           
 AS BEGIN                          
-DECLARE     
-@Empresa            varchar(5),                          
-@IntelMESInterfase  bit ,                        
-@MOV                VARCHAR(50),                        
-@MOVID              VARCHAR(30),                        
-@ESTATUS            VARCHAR(30),                  
-@SubClave           VARCHAR(20),            
-@Clave              varchar(10),          
-@IDNC               INT,      
-@Sucursal           int,
-@AplicaMovNota      varchar(20),
-@AplicaIDMovNota    varchar(20),
-@ImporteO	        float,
-@ImporteAct         float
-                                        
-           
-IF @Modulo='VTAS'   
-BEGIN
-     SELECT @Mov=Mov , 
-            @Estatus = Estatus,
-            @Sucursal = Sucursal
-       FROM Venta 
-      WHERE ID=@ID
+                  
+DECLARE     @Empresa     varchar(5),                          
+                  
+                       @IntelMESInterfase bit ,                        
+                  
+                       @MOV  VARCHAR(50),                        
+                  
+                       @MOVID VARCHAR(30),                        
+                  
+                       @ESTATUS  VARCHAR(30),                  
+                  
+        @SubClave   VARCHAR(20),            
+  @Clave  varchar(10),          
+        @IDNC           INT,      
+  @Sucursal  int,
+  @AplicaMovNota varchar(20),
+  @AplicaIDMovNota varchar(20),
+  @ImporteO	float,
+  @ImporteAct float
+                  
+ --Integracion MES------------------------------------------------------------------------------------                          
+                  
+       IF @Accion='CANCELAR'            
+            
+   BEGIN            
+            
+            
+   IF @Modulo='VTAS'            
+   BEGIN            
+     SELECT @MOV=MOV , @ESTATUS = ESTATUS FROM VENTA WHERE ID=@ID              
+         IF @MOV LIKE 'fACT%' AND @ESTATUS='CANCELADO'            
+         BEGIN            
+            
+         EXEC MURSPFACTCANCELADANVK  @ID            
+         END            
+            
+   END            
+            
+            
+            
+   END            
+          
       
-        IF @Accion='CANCELAR'                     
-           BEGIN            
-                 IF @MOV LIKE 'fACT%' AND @ESTATUS='CANCELADO'            
-                 BEGIN            
-                    EXEC MURSPFACTCANCELADANVK  @ID            
-                 END            
-            END
-    /*JARC mandar llamar el sp que afecta el pedido*/
-/*        IF @Accion='AFECTAR'              
-        BEGIN
-
-            IF @Mov = 'Cotizacion' AND @Estatus ='PENDIENTE'
-            EXEC nvk_sp_GenerarPedido @Sucursal,@Modulo,@ID, @Usuario
-
-        END*/
-
-END
-
 --IF @Accion='AFECTAR' AND @Modulo='PC'       
 --BEGIN      
 ----SELECT DISTINCT MOV FROM PC      
 --     SELECT @MOV=MOV , @ESTATUS = ESTATUS FROM PC WHERE ID=@ID            
+      
 --  IF @MOV='Precios' AND @ESTATUS IN ('CONCLUIDO','PENDIENTE','VIGENTE')      
 --     BEGIN      
+      
+      
 --  EXEC  MURSPENVIACORREOSPRECIOS @ID       
+      
+      
 --  END       
+      
+      
+      
 --END      
---Integracion MES------------------------------------------------------------------------------------           
+      
+      
+          
+          
 IF @Modulo='EMB' AND @Accion='AFECTAR'              
 BEGIN              
+              
 EXEC MURSPGENERAGUIAEMBARQUEVTA  @ID               
+              
 END              
-
+              
+              
+              
+              
 IF(@Modulo IN ('INV', 'COMS', 'VTAS', 'PROD') AND @Accion IN ('AFECTAR', 'CANCELAR'))                          
                   
 BEGIN                           
                   
  IF (@Modulo ='INV')                          
-    SELECT @Empresa=Empresa FROM Inv WHERE ID=@ID                          
-             
+                  
+  SELECT @Empresa=Empresa FROM Inv WHERE ID=@ID                          
+                  
  IF (@Modulo ='COMS')                          
                   
   SELECT @Empresa=Empresa FROM Compra WHERE ID=@ID                          
@@ -1438,35 +1455,39 @@ IF  @Modulo='COMS'
   EXEC MURSPGENERAPLICACIONCXPNAVITEK @ID          
           
   END          
-    
+        
+        
+        
+                  
 BEGIN                        
                   
-  IF @Modulo ='VTAS'                              
+IF @Modulo ='VTAS' AND @Accion = 'AFECTAR' AND @Ok IS NULL
+BEGIN
+SELECT @Mov       = v.Mov,
+       @Clave     = Clave,
+       @SubClave  = SubClave
+  FROM Venta      v
+  JOIN MovTipo    mt      ON v.Mov = mt.Mov AND mt.Modulo = @Modulo
+ WHERE Id = @Id
+
+       IF   @Clave = 'VTAS.P' AND @SubClave = 'VTAS.PNVK' --AND @Mov = 'Cotizacion'
+       BEGIN
+       --EXEC MURSPCOMPARAPRECIOSDETALLE @ID                
+       EXEC MURSPAVISAPARTIDASDESCUENTO @ID, @Ok OUTPUT, @OkRef OUTPUT
+       END
                   
-  BEGIN                        
+      --SELECT @MOV=Mov FROM  Venta WHERE ID=@ID                          
                   
-   --EXEC MURSPCOMPARAPRECIOSDETALLE @ID                
-                  
-   EXEC MURSPAVISAPARTIDASDESCUENTO @ID, @Ok OUTPUT, @OkRef OUTPUT                            
-                  
-  SELECT @MOV=Mov FROM  Venta WHERE ID=@ID                          
-                  
-  IF  @MOV LIKE 'FAC%'                          
-                  
-  BEGIN                          
-                  
-   EXEC MURSPGENERAPLICACIONCXCNAVITEK  @ID                          
-                  
- END                          
-    IF  @MOV = 'Refacturacion NVK'                          
-                  
-  BEGIN                          
-                  
-   EXEC MURSPACTUUIDREF  @ID                          
-                  
-   END                
-    
-  END                       
+        IF  @MOV LIKE 'FAC%'                          
+        BEGIN                          
+            EXEC MURSPGENERAPLICACIONCXCNAVITEK  @ID                          
+        END                          
+            
+        IF  @MOV = 'Refacturacion NVK'                          
+        BEGIN                          
+         EXEC MURSPACTUUIDREF  @ID                          
+        END                
+END                       
                   
  IF @MODULO='AF'                        
                   
@@ -1507,7 +1528,9 @@ BEGIN
 EXEC MURSPNAVREFERENCIA  @ID --,@OK OUTPUT    SELECT DISTINCT MOV FROM CXC    
         
 END        
- 
+        
+        
+        
 END      
     
                   
@@ -1678,8 +1701,10 @@ IF(@Modulo IN ('NOM') AND @Accion IN ('AFECTAR'))
 
 	END -- Gastos Pendientes
   END
-     
+      
+                  
 RETURN                          
+                  
 END
 GO
 /******************************************** nvk_sp_GenerarPedido ***************************************************/
@@ -1723,5 +1748,6 @@ SELECT @RenglonID = COUNT(vd.RenglonID)
             EXEC spAfectar @Modulo, @IdGenerado, 'AFECTAR', 'Todo', NULL, @Usuario
 RETURN
 END
+
 
 
