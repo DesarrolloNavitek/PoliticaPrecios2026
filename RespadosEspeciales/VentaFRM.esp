@@ -1,0 +1,673 @@
+[VENTA.FRM/Ficha.ListaEnCaptura]
+Venta.ListaPreciosEsp=DescuentoNavitek
+DescuentoNavitek=Venta.EnviarA
+Venta.Actividad=Venta.Promocion
+Venta.Agente=Agente.Nombre
+Venta.Almacen=Alm.Nombre
+Venta.Referencia=Venta.Causa
+Venta.Promocion=Venta.DescripcionPromo
+Venta.DescripcionPromo=Venta.ServicioNumero
+Venta.ServicioNumero=Venta.Cliente
+Agente.Nombre=Venta.Almacen
+Alm.Nombre=Venta.PosicionWMS
+Venta.Causa=Venta.OrdenCompra
+
+[VENTA.FRM/Forma]
+PosicionInicialIzquierda=0
+PosicionInicialArriba=22
+PosicionInicialAncho=1865
+PosicionInicialAlturaCliente=796
+ExpresionesAlMostrar=Asigna(Info.Copiar, Falso)<BR>Asigna(Info.Positivos, Verdadero)<BR>Asigna(Info.Paquete, Nulo)<BR>Asigna(Info.RefrescandoPrecio, Falso)<BR>Asigna(Info.ABC, Nulo)<BR>ASIGNA(Info.Usuario,USUARIO.Usuario)
+ExpresionesAlCerrar=Asigna(Filtro.Cliente, Nulo)<BR>Asigna(Filtro.Proyecto, Nulo)<BR>Asigna(Filtro.Aseguradora, Nulo)<BR>Asigna(Filtro.Mov, Nulo)<BR>Asigna(Filtro.Proyecto, Nulo)<BR>Asigna(Filtro.Actividad, Nulo)<BR>ASIGNA(Info.Usuario,USUARIO.Usuario)
+ExpresionesAlActivar=ASIGNA(Info.Usuario,USUARIO.Usuario)
+
+[VENTA.FRM/Ficha.DescuentoNavitek]
+Carpeta=Ficha
+Clave=DescuentoNavitek
+ValidaNombre=S
+3D=S
+ColorFondo=Blanco
+
+[Venta.frm/(Carpeta Abrir)]
+FiltroGeneral=Cte.Familia IN ( SELECT FamCte FROM USUARIOFAMNAVITEK WHERE USUARIO=<T>{Info.Usuario}<T> ) AND ISNULL(Venta.Agente,<T>ADMIN1<T>) IN (SELECT * FROM DBO.MURFNTAGENTESVENTA(<T>{Info.Usuario}<T> ))
+ExpAntesRefrescar=ASIGNA(Info.Usuario,USUARIO.Usuario)
+FiltroUsuarioDefault=(Todos)
+FiltroSucursalesTodasPorOmision=S
+
+[Venta.frm/Acciones.Guardar]
+BarraBtnFuente=
+BarraBtnTxtAlign=
+BarraBtnTxtPos=
+BarraBtnSubtitFuente=
+BarraBtnDescripFuente=
+BarraBtnImgPos=
+BarraBtnImgAlign=
+BarraBtnSubtituloAli=
+BarraBtnDescripcionAli=
+BarraBtnSubtituloPos=
+BarraBtnDescripcionPos=
+AccionSecTextoFuente=
+AccionSecAli=
+Multiple=S
+ListaAccionesMultiples=(Lista)
+
+[Venta.frm/Acciones.Guardar.Guardar]
+Nombre=Guardar
+Boton=0
+TipoAccion=Controles Captura
+ClaveAccion=Guardar Cambios
+Activo=S
+Visible=S
+
+[Venta.Frm/Ficha.Venta.Causa]
+Carpeta=Ficha
+Clave=Venta.Causa
+Editar=S
+ValidaNombre=N
+3D=S
+Tamano=55
+ColorFondo=Blanco
+Pegado=S
+
+[Venta.frm/Acciones.Guardar.Refresca]
+Nombre=Refresca
+Boton=0
+TipoAccion=Expresion
+Expresion=Si <BR>EntornoTrabajo=<T>Escritorio<T> Entonces <BR> ActualizarVista <BR>Fin <BR>ActualizarForma<BR>Asigna(Info.Cliente,Venta:Venta.Cliente)
+Activo=S
+Visible=S
+
+[Venta.frm/Acciones.Guardar.ListaAccionesMultiples]
+(Inicio)=Guardar
+Guardar=Refresca
+Refresca=(Fin)
+
+[Venta.Frm/Detalle.Columnas]
+PrecioConDescuentos=112
+ImporteDesc=96
+
+[Venta.frm/ComentarioVta]
+Estilo=Ficha
+Pestana=S
+PestanaOtroNombre=S
+PestanaNombre=Comentarios
+Clave=ComentarioVta
+PermiteEditar=S
+AlineacionAutomatica=S
+AcomodarTexto=S
+MostrarConteoRegistros=S
+Zona=A1
+Vista=Venta
+Fuente={Tahoma, 8, Negro, []}
+FichaEspacioEntreLineas=6
+FichaEspacioNombres=100
+FichaEspacioNombresAuto=S
+FichaNombres=Izquierda
+FichaAlineacion=Izquierda
+FichaAlineacionDerecha=S
+FichaColorFondo=Plata
+CampoColorLetras=Negro
+CampoColorFondo=Blanco
+ListaEnCaptura=Venta.ComentarioVenta
+CarpetaVisible=S
+AlinearTodaCarpeta=S
+
+[Venta.frm/ComentarioVta.Venta.ComentarioVenta]
+Carpeta=ComentarioVenta
+Clave=Venta.ComentarioVenta
+Editar=S
+EditarConBloqueo=S
+LineaNueva=S
+ValidaNombre=S
+3D=S
+ColorFondo=Blanco
+
+[Venta.frm/Ficha.Venta.FormaEnvio]
+ValidaNombre=S
+
+[Venta.frm/Ficha.Venta.OrdenCompra]
+ValidaNombre=S
+EditarConBloqueo=S
+
+[Venta.frm/Comentarios]
+Estilo=Ficha
+Pestana=S
+PestanaOtroNombre=S
+PestanaNombre=Comentarios Venta
+
+[Venta.frm/Comentarios.Venta.Comentarios]
+ColorFuente=
+EditarConBloqueo=S
+
+[Venta.frm/Acciones.RepPantalla]
+Antes=S
+AntesExpresiones=Asigna(Info.id,Venta:Venta.ID)
+
+[Venta.frm/Acciones.RepImpresora]
+Antes=S
+AntesExpresiones=Asigna(Info.id,Venta:Venta.ID)
+
+[Venta.frm/Detalle.ListaEnCaptura]
+VentaD.DescuentoLinea=PrecioConDescuentos
+VentaD.ExcluirPlaneacion=ImporteDesc
+PrecioConDescuentos=VentaD.DescuentoImporte
+ImporteTotal=Importe
+ImporteDesc=Importe
+
+[Venta.frm/Detalle.PrecioConDescuentos]
+Carpeta=Detalle
+Clave=PrecioConDescuentos
+LineaNueva=S
+ValidaNombre=S
+3D=S
+ColorFondo=Blanco
+
+[Venta.frm/Detalle.ImporteTotal]
+Carpeta=Detalle
+Clave=ImporteTotal
+Editar=S
+LineaNueva=S
+ValidaNombre=S
+3D=S
+ColorFondo=Blanco
+
+[Venta.Frm/Acciones.Embarque]
+ActivoCondicion=MovTipoEn(<T>VTAS<T>, Venta:Venta.Mov, (VTAS.F,VTAS.FAR,VTAS.FC,VTAS.FG,VTAS.FX,VTAS.DFC,VTAS.FB,VTAS.R,VTAS.SG,VTAS.EG,VTAS.VC,VTAS.VCR,VTAS.S,VTAS.P)) y (Venta:Venta.Estatus<>EstatusCancelado)
+
+[Venta.Frm/Acciones.DescuentoGlobal]
+Expresion=Asigna(Temp.Monetario, Suma(VentaD:Importe))<BR><BR>Si(Forma(<T>EspecificarDescuentoGlobal<T>),EjecutarSQL(<T>MURSPACTUALIZADETALLE :NID,:NDESCU<T>,Venta:Venta.Id, Info.Monto)Forma.ActualizarTotalizadores)
+GuardarAntes=S
+RefrescarDespues=S
+
+[Venta.frm/Detalle.ImporteDesc]
+Carpeta=Detalle
+Clave=ImporteDesc
+Editar=S
+LineaNueva=S
+ValidaNombre=S
+3D=S
+ColorFondo=Blanco
+
+[Venta.Frm/Ficha.Alm.Nombre]
+Carpeta=Ficha
+Clave=Alm.Nombre
+Editar=S
+ValidaNombre=N
+3D=S
+Tamano=55
+ColorFondo=Blanco
+Pegado=S
+
+[Venta.frm/Ficha.Venta.Almacen]
+Pegado=S--
+
+[Venta.Frm/Lista.Columnas]
+Temporada=129
+FechaD=94
+FechaA=94
+Vencimiento=94
+0=105
+1=247
+
+[Venta.frm/Detalle.ListaCamposAValidar]
+DescripcionIdioma=CteLista
+OpcionDesc=
+Art.Unidad=Art.PrecioLista
+Art.Tipo=
+CteLista=Art.Unidad
+
+[Venta.Frm/Forma.ListaCarpetas]
+Comentarios=ComentarioVta
+ComentarioVta=Detalle
+
+[Venta.Frm/Ficha.Agente.Nombre]
+Carpeta=Ficha
+Clave=Agente.Nombre
+Editar=S
+ValidaNombre=N
+3D=S
+Tamano=55
+ColorFondo=Blanco
+Pegado=S
+
+[Venta.Frm/Ficha.Venta.Promocion]
+Carpeta=Ficha
+Clave=Venta.Promocion
+Editar=S
+LineaNueva=N
+ValidaNombre=S
+3D=S
+ColorFondo=Blanco
+Tamano=10
+
+[Venta.Frm/Ficha.Venta.DescripcionPromo]
+Carpeta=Ficha
+Clave=Venta.DescripcionPromo
+Editar=S
+LineaNueva=N
+ValidaNombre=N
+3D=S
+Tamano=25
+ColorFondo=Blanco
+Pegado=S
+
+[Venta.Frm/(Carpeta Abrir).FiltroListaEstatus]
+SINAFECTAR=CONFIRMAR
+BORRADOR=
+PENDIENTE=CONCLUIDO
+FUERALINEA=
+SINCRO=
+RECURRENTE=
+CANCELADO=(Fin)
+PROCESAR=
+VIGENTE=
+
+[Venta.Frm/Acciones.PCKTarimaVentaPerdida]
+Nombre=PCKTarimaVentaPerdida
+Boton=0
+Menu=&Edición
+NombreDesplegar=Reacomodar Surtidos
+GuardarAntes=S
+EnBarraHerramientas=S
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=PCKTarimaVentaPerdida
+Activo=S
+Antes=S
+AntesExpresiones=Asigna(Info.ID,Venta:Venta.ID)<BR>Asigna(Info.Estatus, Venta:Venta.Estatus)<BR>EjecutarSQL( <T>spVentaPerdidaPCKTarima :tEmpresa, :nID<T>,Empresa, Info.ID )
+VisibleCondicion=MovTipoEn( <T>VTAS<T>, Venta:Venta.Mov, (<T>VTAS.VP<T>))
+
+[Venta.Frm/Acciones.Cliente]
+Nombre=Cliente
+Boton=37
+NombreEnBoton=S
+Menu=&Archivo
+NombreDesplegar=&InfoCte
+EnBarraHerramientas=S
+EspacioPrevio=S
+TipoAccion=Expresion
+Expresion=Informacion( Info.Cliente )
+Activo=S
+Visible=S
+
+[Venta.frm/Acciones.Verificar]
+RefrescarDespues=S
+
+[Venta.Frm/Ficha.Venta.ServicioNumero]
+Carpeta=Ficha
+Clave=Venta.ServicioNumero
+Editar=S
+LineaNueva=N
+ValidaNombre=S
+3D=S
+ColorFondo=Blanco
+
+[Venta.Frm/Ficha.Venta.Parcial]
+Carpeta=Ficha
+Clave=Venta.Parcial
+Editar=S
+3D=S
+Tamano=20
+ColorFondo=Blanco
+EditarConBloqueo=S
+
+[Venta.frm/Ficha.Venta.Condicion]
+EditarConBloqueo=S
+
+[Venta.frm/Ficha.Venta.FormaPagoTipo]
+EditarConBloqueo=S
+
+[Venta.frm/Detalle.ListaAcciones]
+VentaDEmbarques=CFDCartaPorteDIR
+CFDCartaPorteDIR=CFDCartaPorteDIRInfo
+CFDCartaPorteDIRInfo=CFDCartaPorteID
+CFDCartaPorteID=(Fin)
+
+[Venta.Frm/Forma.ListaAcciones]
+(Inicio)=Nuevo
+Nuevo=MovCopiar
+MovCopiar=CopiarLote
+CopiarLote=CopiarMeses
+CopiarMeses=Abrir
+Abrir=Localizar
+Localizar=Guardar
+Guardar=Actualizar
+Actualizar=ActualizarPrecios
+ActualizarPrecios=MovPersonal
+MovPersonal=Evaluaciones
+Evaluaciones=Propiedades
+Propiedades=Imprimir
+Imprimir=RepPantalla
+RepPantalla=PlantillasOffice
+PlantillasOffice=FormasAnexas
+FormasAnexas=Excel
+Excel=Verificar
+Verificar=Situacion
+Situacion=WizardSituaciones
+WizardSituaciones=Sucursal
+Sucursal=Afectar
+Afectar=Autorizar
+Autorizar=FEA
+FEA=Desafectar
+Desafectar=Consecutivo
+Consecutivo=GenerarCFDI
+GenerarCFDI=AnticiposRelacionados
+AnticiposRelacionados=CFDIVentaTimbrada
+CFDIVentaTimbrada=CFDRelacionadoVentaSaldo
+CFDRelacionadoVentaSaldo=CancelarCFDI
+CancelarCFDI=ModificarAlmacen
+ModificarAlmacen=Eliminar
+Eliminar=Importar
+Importar=ImportarPDT
+ImportarPDT=Cancelar
+Cancelar=Refacturar
+Refacturar=ReasignarUsuario
+ReasignarUsuario=ActualizarPoliticasPrecios
+ActualizarPoliticasPrecios=ActualizarPrecioMoneda
+ActualizarPrecioMoneda=Cambiar Vista Hoja
+Cambiar Vista Hoja=CopiarPendientes
+CopiarPendientes=CopiarOtros
+CopiarOtros=CopiarComentario
+CopiarComentario=Embarcar
+Embarcar=SubMovimiento
+SubMovimiento=AnexarMov
+AnexarMov=Campos
+Campos=CamposExtras
+CamposExtras=DatosEntrega
+DatosEntrega=Cobro
+Cobro=Totalizar
+Totalizar=DescuentoGlobal
+DescuentoGlobal=Accesorios
+Accesorios=ServicioMatriz
+ServicioMatriz=Asistente Articulos
+Asistente Articulos=Asistente Codigo Barras
+Asistente Codigo Barras=Asistente Codigo Barras (Lote)
+Asistente Codigo Barras (Lote)=Entarimar
+Entarimar=SurtirTarima
+SurtirTarima=Actividades
+Actividades=MovActividad
+MovActividad=SeriesLotes
+SeriesLotes=Sustitutos
+Sustitutos=Precio
+Precio=PrecioConImpuestos
+PrecioConImpuestos=ProrrateoFecha
+ProrrateoFecha=ServicioTipoPlantilla
+ServicioTipoPlantilla=AnticiposFacturados
+AnticiposFacturados=Anexos
+Anexos=AnexosDetalle
+AnexosDetalle=AgregarEvento
+AgregarEvento=Anticipos
+Anticipos=TraspasarArticulos
+TraspasarArticulos=Tareas
+Tareas=Embarque
+Embarque=Incentivo
+Incentivo=Participacion
+Participacion=CteExpress
+CteExpress=EditarCliente
+EditarCliente=CteEnviarA
+CteEnviarA=ArtExpress
+ArtExpress=VINExpress
+VINExpress=EditarVIN
+EditarVIN=VentaOtros
+VentaOtros=PresupuestoEsp
+PresupuestoEsp=Anterior
+Anterior=Siguiente
+Siguiente=Catalogos
+Catalogos=ArtListaDisponible
+ArtListaDisponible=Disponible
+Disponible=ArtInfo
+ArtInfo=EspacioInfo
+EspacioInfo=CteInfo
+CteInfo=ProyInfo
+ProyInfo=ServicioHist
+ServicioHist=VINComponentes
+VINComponentes=VentaDReservados
+VentaDReservados=ArtAccesorioBuscar
+ArtAccesorioBuscar=ArtRefaccionBuscar
+ArtRefaccionBuscar=VerPoliticaPrecios
+VerPoliticaPrecios=TiempoEntregaSugerido
+TiempoEntregaSugerido=Asistente Precios
+Asistente Precios=MovImpuesto
+MovImpuesto=Boletos
+Boletos=BoletosVendidos
+BoletosVendidos=Resumen
+Resumen=FordOasis
+FordOasis=AsesoresDisponible
+AsesoresDisponible=Tiempo
+Tiempo=VerComentarios
+VerComentarios=Politica
+Politica=PoliticaConcepto
+PoliticaConcepto=Mapa
+Mapa=OfertaLog
+OfertaLog=MovBitacora
+MovBitacora=PedidoPos
+PedidoPos=TablaAmortizacion
+TablaAmortizacion=RentabilidadContrato
+RentabilidadContrato=CFDCancelacionHist
+CFDCancelacionHist=MovPos
+MovPos=MESExplorar
+MESExplorar=RecalcularPrecios
+RecalcularPrecios=EstatusProduccion
+EstatusProduccion=Navegador
+Navegador=SorianaRemision
+SorianaRemision=LDIMovLog
+LDIMovLog=PDFIntelisis
+PDFIntelisis=CFDICliente
+CFDICliente=CFDIProveedor
+CFDIProveedor=ContParalelaMovDato
+ContParalelaMovDato=VentaEmbarques
+VentaEmbarques=MonederoCBSaldo
+MonederoCBSaldo=HeredarReglasNegocio
+HeredarReglasNegocio=Cerrar
+Cerrar=Otros1
+Otros1=Otros2
+Otros2=CFDCartaPorteMismoDir
+CFDCartaPorteMismoDir=CFDCartaPorteMismoDirInfo
+CFDCartaPorteMismoDirInfo=CFDCartaPorte
+CFDCartaPorte=CFDCartaPorteInfo
+CFDCartaPorteInfo=DetalleCP
+DetalleCP=ArtCartaPorteD
+ArtCartaPorteD=ArtCartaPorteDInfo
+ArtCartaPorteDInfo=ObjetoImpuesto
+ObjetoImpuesto=ObjetoImpuestoD
+ObjetoImpuestoD=CFDMotivoCancelacion
+CFDMotivoCancelacion=Otros3
+Otros3=Otros4
+Otros4=Otros5
+Otros5=Otros7
+Otros7=Otros6
+Otros6=Otros8
+Otros8=Otros9
+Otros9=VentaOtrosCFD
+VentaOtrosCFD=CancelarCP
+CancelarCP=PCKTarimaVentaPerdida
+PCKTarimaVentaPerdida=Cliente
+Cliente=(Fin)
+
+[Venta.frm/Acciones.ArtCartaPorteD]
+Nombre=ArtCartaPorteD
+Boton=0
+Menu=&Edición
+NombreDesplegar=Articulos Carta Porte
+GuardarAntes=S
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=ArtCartaPorteD
+Antes=S
+DespuesGuardar=S
+ActivoCondicion=Si SQL(<T>SELECT CFD_tipoDeComprobante FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>, <T>VTAS<T>, Venta:Venta.Mov)=<T>ingreso<T><BR>Entonces<BR>  Verdadero<BR>Fin
+AntesExpresiones=Asigna( Info.ID, Venta:Venta.ID )<BR>Asigna( Info.Cliente, Venta:Venta.Cliente )<BR>Asigna( Info.Modulo, <T>VTAS<T> )
+VisibleCondicion=Si SQL(<T>SELECT CartaPorte FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>, <T>VTAS<T>, Venta:Venta.Mov)  y (SQL(<T>spVerMovTipoCFD :tEmpresa, :tModulo, :tMov, :nID<T>, Empresa, <T>VTAS<T>, Venta:Venta.Mov, Venta:Venta.ID))<BR>Entonces<BR>  Verdadero<BR>Sino<BR>  Falso<BR>Fin
+
+[Venta.frm/Acciones.Observaciones]
+Activo=
+ActivoCondicion=Usuario.ModificarReferencias
+
+[Venta.frm/Notas.Venta.Atencion]
+EditarConBloqueo=S
+
+[Venta.frm/Notas.Venta.AtencionTelefono]
+EditarConBloqueo=S
+
+[Venta.frm/Acciones.ArtCartaPorteDInfo]
+Nombre=ArtCartaPorteDInfo
+Boton=0
+Menu=&Edición
+NombreDesplegar=Articulos Carta Porte Info.
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=ArtCartaPorteDInfo
+Activo=S
+Antes=S
+AntesExpresiones=Asigna( Info.ID, Venta:Venta.ID )<BR>Asigna( Info.Cliente, Venta:Venta.Cliente )<BR>Asigna( Info.Modulo, <T>VTAS<T> )
+VisibleCondicion=Si (SQL(<T>SELECT CartaPorte FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>,<T>VTAS<T>, Venta:Venta.Mov)) y ( no SQL(<T>spVerMovTipoCFD :tEmpresa, :tModulo, :tMov, :nID<T>, Empresa, <T>VTAS<T>, Venta:Venta.Mov, Venta:Venta.ID)) y<BR>(SQL(<T>SELECT CFD_tipoDeComprobante FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>, <T>VTAS<T>, Venta:Venta.Mov)=<T>ingreso<T>)<BR>Entonces<BR>  Verdadero<BR>Fin
+
+[Venta.frm/Acciones.CFDCartaPorte]
+Nombre=CFDCartaPorte
+Boton=0
+Menu=&Edición
+NombreDesplegar=Complemento Carta Porte
+GuardarAntes=S
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=CFDCartaPorte
+Activo=S
+Antes=S
+DespuesGuardar=S
+EspacioPrevio=S
+AntesExpresiones=Asigna(Info.Modulo, <T>VTAS<T>)<BR>Asigna(Info.ID, Venta:Venta.ID)<BR>Asigna(Info.Cliente, Venta:Venta.Cliente)<BR>EjecutarSQL(<T>EXEC SPCartaPorteEliminaRegistros :tModu, :nIds<T>, <T>VTAS<T>, Venta:Venta.ID)
+VisibleCondicion=Si (SQL(<T>SELECT CartaPorte FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>,<T>VTAS<T>, Venta:Venta.Mov)) y (SQL(<T>spVerMovTipoCFD :tEmpresa, :tModulo, :tMov, :nID<T>, Empresa, <T>VTAS<T>, Venta:Venta.Mov, Venta:Venta.ID))<BR>Entonces<BR>  Verdadero<BR>Fin
+
+[Venta.frm/Acciones.CFDCartaPorteID]
+Nombre=CFDCartaPorteID
+Boton=0
+NombreDesplegar=ID Origen y Destino Carta Porte
+GuardarAntes=S
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=CFDCartaPorteID
+Activo=S
+Antes=S
+DespuesGuardar=S
+AntesExpresiones=Asigna( Info.Modulo, <T>VTAS<T> )<BR>Asigna( Info.ID, Venta:Venta.ID )<BR>Asigna( Info.Renglon, VentaD:VentaD.Renglon )<BR>Asigna( Info.RenglonID, VentaD:VentaD.RenglonID )<BR>Asigna( Info.Estatus, Venta:Venta.Estatus )<BR>Asigna( Info.Cantidad, VentaD:VentaD.Cantidad )<BR>Asigna( Info.Articulo, VentaD:VentaD.Articulo )<BR>Asigna( Info.Descripcion, VentaD:Art.Descripcion1)<BR>Asigna( Info.Cliente, Venta:Venta.Cliente)<BR>Asigna( Info.Almacen, VentaD:VentaD.Almacen)<BR><BR><BR>EjecutarSQL(<T>EXEC SPCartaPorteEliminaRegistros :tModu, :nIds<T>, <T>VTAS<T>, Venta:Venta.ID)
+VisibleCondicion=Si SQL(<T>SELECT CartaPorte FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>, <T>VTAS<T>, Venta:Venta.Mov) y (VentaD:VentaD.RenglonTipo <> <T>C<T>) y (SQL(<T>spVerMovTipoCFD :tEmpresa, :tModulo, :tMov, :nID<T>, Empresa, <T>VTAS<T>, Venta:Venta.Mov, Venta:Venta.ID))<BR>Entonces<BR>  Verdadero                         <BR>SiNo<BR>  Falso<BR>Fin
+
+[Venta.frm/Acciones.CFDCartaPorteInfo]
+Nombre=CFDCartaPorteInfo
+Boton=0
+NombreDesplegar=Carta Porte Info
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=CFDCartaPorteInfo
+Activo=S
+Antes=S
+Menu=&Edición
+AntesExpresiones=Asigna(Info.Modulo, <T>VTAS<T>)<BR>Asigna(Info.ID, Venta:Venta.ID)<BR>Asigna(Info.Cliente, Venta:Venta.Cliente)
+VisibleCondicion=Si (SQL(<T>SELECT CartaPorte FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>,<T>VTAS<T>, Venta:Venta.Mov)) y ( no SQL(<T>spVerMovTipoCFD :tEmpresa, :tModulo, :tMov, :nID<T>, Empresa, <T>VTAS<T>, Venta:Venta.Mov, Venta:Venta.ID))<BR>Entonces<BR>  Verdadero<BR>Fin
+
+[Venta.frm/Acciones.DetalleCP]
+Nombre=DetalleCP
+Boton=0
+Menu=&Edición
+NombreDesplegar=Carta Porte Detalle
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=VentaDCartaPorte
+Activo=S
+Antes=S
+AntesExpresiones=Asigna( Info.ID, Venta:Venta.ID )<BR>Asigna( Info.Estatus, Venta:Venta.Estatus)
+VisibleCondicion=Si SQL(<T>SELECT VentaDCartaPorte FROM MovTipo WHERE Modulo = :tModulo AND Mov = :tMov<T>, <T>VTAS<T>, Venta:Venta.Mov) y (Venta:Venta.Estatus = <T>CONCLUIDO<T>)<BR>Entonces<BR>  Verdadero<BR>SiNo<BR>  Falso<BR>Fin
+
+[Venta.frm/Acciones.CFDCartaPorteDIR]
+Nombre=CFDCartaPorteDIR
+Boton=0
+NombreDesplegar=Dirección Carta Porte
+GuardarAntes=S
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=CFDCartaPorteDireccionVtas
+Activo=S
+Antes=S
+DespuesGuardar=S
+AntesExpresiones=Asigna( Info.Modulo, <T>VTAS<T> )<BR>Asigna( Info.ID, Venta:Venta.ID )<BR>Asigna( Info.Renglon, VentaD:VentaD.Renglon )<BR>Asigna( Info.RenglonID, VentaD:VentaD.RenglonID )<BR>Asigna( Info.Estatus, Venta:Venta.Estatus )<BR>Asigna( Info.Cantidad, VentaD:VentaD.Cantidad )<BR>Asigna( Info.Articulo, VentaD:VentaD.Articulo )<BR>Asigna( Info.Descripcion, VentaD:Art.Descripcion1)<BR>Asigna( Info.Cliente, Venta:Venta.Cliente)<BR>Asigna( Info.Almacen, VentaD:VentaD.Almacen)
+VisibleCondicion=Venta:Venta.Mov=SQL(<T>SELECT Mov FROM MOVTIPO WHERE Modulo=:tMod AND CartaPorte=:nCP AND Mov=:tMov<T>, <T>VTAS<T>, 0, Venta:Venta.Mov) Y (Venta:Venta.Estatus=<T>SINAFECTAR<T>)
+
+[Venta.frm/Acciones.CFDCartaPorteDIRInfo]
+Nombre=CFDCartaPorteDIRInfo
+Boton=0
+NombreDesplegar=Dirección Carta Porte Info
+GuardarAntes=S
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=CFDCartaPorteDireccionVtasInfo
+Activo=S
+Antes=S
+DespuesGuardar=S
+AntesExpresiones=Asigna( Info.Modulo, <T>VTAS<T> )<BR>Asigna( Info.ID, Venta:Venta.ID )<BR>Asigna( Info.Renglon, VentaD:VentaD.Renglon )
+VisibleCondicion=Venta:Venta.Mov=SQL(<T>SELECT Mov FROM MOVTIPO WHERE Modulo=:tMod AND CartaPorte=:nCP AND Mov=:tMov<T>, <T>VTAS<T>, 0, Venta:Venta.Mov) Y (Venta:Venta.Estatus<><T>SINAFECTAR<T>)
+
+[Venta.frm/Acciones.CFDCartaPorteMismoDir]
+Nombre=CFDCartaPorteMismoDir
+Boton=0
+NombreDesplegar=Dirección Carta Porte
+RefrescarDespues=S
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=CFDCartaPorteMismoDir
+Visible=S
+Menu=&Edición
+Antes=S
+GuardarAntes=S
+ActivoCondicion=Venta:Venta.Mov=SQL(<T>SELECT Mov FROM MOVTIPO WHERE Modulo=:tMod AND CartaPorte=:nCP AND Mov=:tMov<T>, <T>VTAS<T>, 0, Venta:Venta.Mov) Y (Venta:Venta.Estatus=<T>SINAFECTAR<T>)
+AntesExpresiones=Asigna(Info.Cliente, Venta:Venta.Cliente)<BR>Asigna( Info.Modulo, <T>VTAS<T> )<BR>Asigna( Info.ID, Venta:Venta.ID )
+
+[Venta.frm/Acciones.CFDCartaPorteMismoDirInfo]
+Nombre=CFDCartaPorteMismoDirInfo
+Boton=0
+Menu=&Edición
+NombreDesplegar=Dirección Carta Porte Info
+EnMenu=S
+TipoAccion=Formas
+ClaveAccion=CFDCartaPorteMismoDirInfo
+Visible=S
+ActivoCondicion=Venta:Venta.Mov=SQL(<T>SELECT Mov FROM MOVTIPO WHERE Modulo=:tMod AND CartaPorte=:nCP AND Mov=:tMov<T>, <T>VTAS<T>, 0, Venta:Venta.Mov) Y (Venta:Venta.Estatus<><T>SINAFECTAR<T>) y (ConDatos( VentaD:VentaD.Articulo))
+Antes=S
+AntesExpresiones=Asigna(Info.Cliente, Venta:Venta.Cliente)<BR>Asigna( Info.Modulo, <T>VTAS<T> )<BR>Asigna( Info.ID, Venta:Venta.ID )
+
+[Venta.frm/Acciones.CancelarCP]
+Nombre=CancelarCP
+Boton=0
+Menu=&Edición
+NombreDesplegar=Cancelar XML
+EnMenu=S
+TipoAccion=Expresion
+Expresion=Si Precaucion(<T>¿Cancelar el XML del movimiento?<T>, BotonSi, BotonNo) =  BotonSi<BR>Entonces<BR>    ProcesarSQL(<T>EXEC spCancelarXMLINV :nID, :tModulo, :tEmpresa, :nEstacion, :tUsuario<T>, Venta:Venta.ID, <T>VTAS<T>, Empresa, EstacionTrabajo, Usuario  )<BR>Fin<BR>ActualizarVista
+Activo=S
+VisibleCondicion=SQL(<T>SELECT Timbrado FROM CFD WHERE ModuloID = :nID AND Modulo = :tModulo AND Cancelado <> 1 <T>, Venta:Venta.ID, <T>VTAS<T> )
+
+[Venta.Frm/Acciones.Otros1]
+Menu=&Edición
+NombreDesplegar=Cambiar Cantidad
+GuardarAntes=S
+Antes=S
+DespuesGuardar=S
+Visible=S
+Expresion=Si<BR>  Forma(<T>EspecificarCantidad<T>)<BR>Entonces<BR>  ProcesarSQL(<T>spNTVentaPedidoCantidadActualizar :nID, :nR, :nRS, :nC<T>, Info.ID, Info.Renglon, Info.RenglonSub, Info.Cantidad)<BR>  ActualizarVista<BR>Fin
+ActivoCondicion=(MovTipo(<T>VTAS<T>, Venta:Venta.Mov) = VTAS.P) y (Venta:Venta.Estatus = EstatusPendiente) y (Usuario.CteArt) y (Venta:Venta.Mov en (<T>PST<T>, <T>PSG<T>, <T>PSM<T>, <T>PSE<T>))
+AntesExpresiones=Asigna(Info.ID, Venta:Venta.ID)<BR>Asigna(Info.Renglon, VentaD:VentaD.Renglon)<BR>Asigna(Info.RenglonSub, VentaD:VentaD.RenglonSub)
+
+[Venta.frm/Acciones.Situacion]
+Expresion=Si  fnMovSituacionTipoFlujo(Empresa, <T>VTAS<T>, Venta:Venta.Mov, Venta:Venta.Estatus) = <T>Condicional<T><BR>Entonces<BR>  Forma(<T>MovSituacionBinariaSiguiente<T>)<BR>  ActualizarVista<BR>Sino<BR>  Forma.Accion(<T>WizardSituaciones<T>)<BR>Fin<BR>  EjecutarSQL(<T>spMESAutorizaPedidoSituacionNVK :nid, :tmod<T>, Venta:Venta.ID, <T>VTAS<T>)<BR> Forma.Accion(<T>Actualizar<T>)
+
+[Venta.Frm/Acciones.Otros2]
+Menu=&Ver
+TipoAccion=Reportes Pantalla
+Boton=98
+NombreDesplegar=Surtido
+EnBarraHerramientas=S
+ClaveAccion=NVKTMASurtido
+ActivoCondicion=(MovTipo(<T>VTAS<T>, Venta:Venta.Mov) = VTAS.P) y (Venta:Venta.Estatus = EstatusPendiente)
+Antes=S
+AntesExpresiones=Asigna(Info.ID, Venta:Venta.ID)<BR>Asigna(Info.Mov, Venta:Venta.Mov)<BR>Asigna(Info.MovID, Venta:Venta.MovID)
+Visible=S
+
