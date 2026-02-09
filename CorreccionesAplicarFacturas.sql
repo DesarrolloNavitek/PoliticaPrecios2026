@@ -1748,6 +1748,45 @@ SELECT @RenglonID = COUNT(vd.RenglonID)
             EXEC spAfectar @Modulo, @IdGenerado, 'AFECTAR', 'Todo', NULL, @Usuario
 RETURN
 END
+GO
+/******************************************* xpMovValidar  **********************************************/
+IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='xpMovValidar')
+DROP PROC [dbo].[xpMovValidar]
+GO
+CREATE PROCEDURE xpMovValidar
+@Modulo		char(5),
+@ID                  int,
+@Accion		char(20),
+@Base		char(20),
+@GenerarMov		char(20),
+@Usuario		char(10),
+@SincroFinal		bit,
+@EnSilencio	        bit,
+@Ok               	int 		OUTPUT,
+@OkRef            	varchar(255) 	OUTPUT,
+@FechaRegistro	datetime
+AS BEGIN
+DECLARE
+@SubClave           VARCHAR(20),            
+@Clave              varchar(10)          
+
+IF @Modulo ='VTAS' AND @Accion = 'VERIFICAR' --AND @Ok IS NULL
+BEGIN
+SELECT @Clave     = Clave,
+       @SubClave  = SubClave
+  FROM Venta      v
+  JOIN MovTipo    mt      ON v.Mov = mt.Mov AND mt.Modulo = @Modulo
+ WHERE Id = @Id
+
+       IF   @Clave = 'VTAS.P' AND @SubClave = 'VTAS.PNVK' --AND @Mov = 'Cotizacion'
+       BEGIN
+       --EXEC MURSPCOMPARAPRECIOSDETALLE @ID                
+       EXEC MURSPAVISAPARTIDASDESCUENTO @ID, @Ok OUTPUT, @OkRef OUTPUT
+       END
+END
+RETURN
+END
+GO
 
 
 
