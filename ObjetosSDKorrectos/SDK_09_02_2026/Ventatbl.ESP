@@ -1,0 +1,146 @@
+[Venta.tbl/Descuento]
+CondicionDespliege=ID=0
+
+[Venta.tbl/DescuentoGlobal]
+CondicionDespliege=ID=0
+
+[Venta.tbl/ComentarioVenta]
+Clave=ComentarioVenta
+Nombre=Comentarios
+Visible=S
+TamanoValidacion=50x3
+TipoDatos=Memo
+VerificarOrtografia=S
+
+[Venta.Tbl/Comentarios]
+Nombre=Comentarios Venta
+ValorRefrescar=SQL(<T>SELECT comentarios FROM cte WHERE cliente=:tLC<T>, Cliente)
+
+[Venta.Tbl/Cliente.ListaRefrescar]
+VigenteA=ComentarioVenta
+ComentarioVenta=(Fin)
+
+[Venta.Tbl/FormaPagoTipo]
+AyudaMemEnBlanco=
+ValorRefrescar=SQL(<T>SELECT FormaPagoTipo FROM Cte WHERE Cliente=:tCliente<T>, Venta:Venta.Cliente)
+
+[Venta.Tbl/FormaEnvio]
+AyudaEnCaptura=Vista
+AyudaForma=FormaEnvioLista
+AyudaVista=ListaFormaEnvio
+AyudaCampo=FormaEnvio.FormaEnvio
+
+[Venta.tbl/FechaOriginal]
+CondicionDespliege=MovTipoEn(<T>VTAS<T>, Mov, (VTAS.C,VTAS.CS,VTAS.VP,VTAS.S,VTAS.PR,VTAS.EST,VTAS.F, VTAS.FAR,VTAS.FB,VTAS.R,VTAS.SG,VTAS.EG,VTAS.VC,VTAS.VCR))
+
+[Venta.tbl/HoraRequerida]
+CondicionDespliege=MovTipoEn(<T>VTAS<T>, Mov, (VTAS.C,VTAS.CS,VTAS.VP,VTAS.S,VTAS.PR,VTAS.EST,VTAS.F, VTAS.FAR,VTAS.FC,VTAS.DFC,VTAS.FB,VTAS.R,VTAS.SG,VTAS.EG,VTAS.VC,VTAS.VCR,VTAS.SD))
+
+[Venta.tbl/Actividad]
+OpcionesColumnas=
+OpcionesRenglones=
+CondicionDespliege=MovTipoEn(<T>VTAS<T>, Mov, (VTAS.EST))
+
+[Venta.tbl/ListaPreciosEsp]
+AyudaEnCaptura=Vista
+AyudaForma=ListaPreciosLista
+AyudaVista=ListaPreciosLista
+AyudaCampo=ListaPreciosEsp
+
+[Venta.Tbl/Condicion]
+AyudaEnCaptura=
+ExpresionCondicionEdicion=Vacio(AnexoID) y (no Usuario.BloquearCondiciones)
+CondicionDespliege=Mov <><T>Cotizacion<T>
+ValorRefrescar=Si((MovTipo(<T>VTAS<T>, Mov)=VTAS.P) y (Promocion=Verdadero), <T>(Fecha)<T>,Si(ConDatos(Venta:Venta.LineaCredito), SQL(<T>SELECT Condicion FROM LC WHERE LineaCredito=:tLC<T>, LineaCredito), Si(ConDatos(Venta:CteEnviarA.Condicion), Venta:CteEnviarA.Condicion, Venta:Cte.Condicion)))
+Formula=sqlenlista(<T>Select condicion from condicion<T>)
+AyudaMemOpc=Validar captura en la lista
+
+[Venta.Tbl/Vencimiento]
+ValorRefrescar=Si<BR>  (MovTipo(<T>VTAS<T>, Mov)=VTAS.P) y (Promocion=Verdadero)<BR>  Entonces<BR>  SQL(<T>SELECT Vencimiento FROM NaviTemporada WHERE Temporada=:ttemp<T>, DescripcionPromo)<BR>  SiNo<BR>   SQL(<T>spVerVencimiento :tModulo, :Empresa, :tContacto, :tCondicion, :fFecha<T>, <T>CXC<T>, Empresa, Cliente, Condicion, FechaEmision)<BR>  Fin
+CondicionEdicion=Vacio(AnexoID) y (Condicion='(Fecha)') y (Estatus en (EstatusSinAfectar,EstatusPorConfirmar,EstatusPendiente,EstatusPorAutorizar)) y (Usuario.ModificarVencimientos)
+
+[Venta.Tbl/Tabla.ListaCampos]
+Ubicacion=ComentarioVenta
+ComentarioVenta=Promocion
+Promocion=DescripcionPromo
+DescripcionPromo=Parcial
+Parcial=(Fin)
+
+[Venta.Tbl/Tabla.SQL]
+MapaLongitud,=Ubicacion,
+Ubicacion=
+Ubicacion,=ComentarioVenta,
+ComentarioVenta,=Promocion,
+Promocion,=DescripcionPromo,
+DescripcionPromo,=Parcial
+Parcial=FROM Venta
+
+[Venta.Tbl/Promocion]
+Clave=Promocion
+Nombre=Temporada    .
+Visible=S
+TamanoValidacion=10
+TipoDatos=Lógico
+ConRefrescarCondiciones=S
+ListaRefrescarCondiciones=DescripcionPromo
+CondicionDespliege=MovTipoEn(<T>VTAS<T>, Mov, (VTAS.P, VTAS.F))
+ConRefrescar=S
+ListaRefrescar=(Lista)
+
+[Venta.Tbl/DescripcionPromo]
+Clave=DescripcionPromo
+Nombre=Descripción Promoción
+Visible=S
+TamanoValidacion=100
+TipoDatos=Texto
+Tamano=100
+AyudaEnCaptura=Vista
+AyudaRefrescar=S
+CondicionDespliege=(MovTipoEn(<T>VTAS<T>, Mov, (VTAS.P, VTAS.F)) y (Promocion=Verdadero))
+AyudaForma=NaviTemporada
+AyudaVista=NaviTemporada
+AyudaCampo=NaviTemporada.Temporada
+ConRefrescar=S
+ListaRefrescar=(Lista)
+ValorRefrescar=Si(Promocion=Falso, Nulo, DescripcionPromo)
+
+[Venta.Tbl/DescripcionPromo.ListaRefrescar]
+(Inicio)=Condicion
+Condicion=Vencimiento
+Vencimiento=(Fin)
+
+[Venta.Tbl/Cliente]
+AlCambiar=Si(MovTipoEn(<T>VTAS<T>, Mov, (VTAS.S, VTAS.CS)), Asigna(ServicioAseguradora, SQL(<T>SELECT Aseguradora FROM Cte WHERE Cliente=:tCte<T>, Cliente))) y Asigna(Info.Cliente,Cliente)
+
+[Venta.Tbl/EnviarA]
+ListaRefrescar=Agente
+
+[Venta.Tbl/ServicioNumero]
+Nombre=Descuento Pedido
+CondicionDespliege=
+
+[Venta.tbl/PosicionWMS]
+CondicionDespliege=
+
+[Venta.Tbl/Parcial]
+Clave=Parcial
+Nombre=Parcial
+Visible=S
+TamanoValidacion=10
+TipoDatos=Lógico
+
+[Venta.Tbl/Atencion]
+Nombre=Volumen Real
+
+[Venta.Tbl/AtencionTelefono]
+Nombre=Gross Weight
+
+[Venta.Tbl/OrdenCompra]
+CondicionEdicion=Vacio(AnexoID) y (Estatus en (EstatusSinAfectar, EstatusPorConfirmar, EstatusPendiente, EstatusBorrador,EstatusConcluido))
+
+[Venta.Tbl/Promocion.ListaRefrescar]
+(Inicio)=DescripcionPromo
+DescripcionPromo=Condicion
+Condicion=Vencimiento
+Vencimiento=(Fin)
+
