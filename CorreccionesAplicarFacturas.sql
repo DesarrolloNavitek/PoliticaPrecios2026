@@ -184,7 +184,10 @@ AS BEGIN
  @TipoComprobante           varchar(20),
  @Descripcion1              varchar(1000),
  @GrupoTrabajo              varchar(50),
- @Autorizacion		        varchar(10)
+ @Autorizacion		        varchar(10),
+ @Subtotal                  float,
+ @Impuestos                 float,
+ @Total                     float
             ----              
         
              
@@ -1031,12 +1034,13 @@ SELECT @Alm                 =v.Almacen,
         @EnviarA            =v.EnviarA,
         @TipoComprobante    =ISNULL(CFD_tipoDeComprobante, ''),
         @GrupoTrabajo       =u.GrupoTrabajo,
-        @OrigenTipo         =v.OrigenTipo
+        @OrigenTipo         =v.OrigenTipo,
+        @Total              =(Importe+Impuestos)
   FROM Venta            v
   LEFT JOIN Alm         a       ON v.Almacen=a.Almacen
   LEFT JOIN MovTipo     mt      ON mt.Mov=@Mov AND mt.Modulo = @Modulo
   LEFT JOIN Usuario     u       ON u.Usuario = v.Usuario
- WHERE ID=@ID    
+ WHERE v.ID=@ID    
 
 --Esta integracion es para aquellos clientes que dan 100% de Descuento en los Articulos del detalle de Ventas, 
 --y sirve para insertar en la tabla de paso el Objeto impuesto 04 para que lo tome de ahi el xml
@@ -1065,6 +1069,17 @@ SELECT @Alm                 =v.Almacen,
     IF @Clave = 'VTAS.P' AND @SubClave = 'VTAS.PNVK' AND @Estatus='SINAFECTAR' AND @Ok IS NULL
 
     BEGIN
+        /*JARC 09/02/2026 importes minimos de venta*/
+        IF @Total <= 15000
+        SELECT @Ok=20305, @OkRef = 'El importe debe ser mayor a $15,000.00 más IVA'
+        
+        IF @Ok = 20305
+        BEGIN
+           UPDATE Venta SET Mensaje = @OK WHERE ID = @Id
+        END
+
+       IF @OK IS NULL
+
        EXEC MURSPORDENADETALLEVTAS @ID         
            
        EXEC MURSPVALIDAPRECIODESCUENTO  @ID,@OK OUTPUT,@OKREF OUTPUT
@@ -1787,6 +1802,7 @@ END
 RETURN
 END
 GO
+
 
 
 
