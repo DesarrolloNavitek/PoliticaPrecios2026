@@ -29,7 +29,7 @@ Visible=S
 OpcionesColumnas=1
 OpcionesRenglones=8
 TamanoValidacion=10
-TipoDatos=Numérico
+TipoDatos=NumÃ©rico
 
 [Descuento]
 Clave=Descuento
@@ -46,6 +46,7 @@ TamanoValidacion=10
 TipoDatos=NumFlotante
 
 FormatoValidacion=(Monetario)
+Monetario=S
 [CuotaMensual]
 Clave=CuotaMensual
 Nombre=Cuota Mensual
@@ -68,6 +69,54 @@ TipoDatos=NumFlotante
 
 
 FormatoValidacion=(Monetario)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Monetario=S
+[Relaciones.vntcaa.LlaveLocal]
+(Inicio)=Cliente
+Cliente=Ejercicio
+Ejercicio=(Fin)
+
+[Relaciones.vntcaa.LlaveRemota]
+(Inicio)=Cliente
+Cliente=Ejercicio
+Ejercicio=(Fin)
+
+
+
+
 
 
 
