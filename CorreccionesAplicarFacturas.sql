@@ -1070,7 +1070,7 @@ SELECT @Alm                 =v.Almacen,
 
     BEGIN
         /*JARC 09/02/2026 importes minimos de venta*/
-        IF @Total <= 15000
+        IF @Total <= 15000 AND @Mov <> 'Cotizacion'
         SELECT @Ok=20305, @OkRef = 'El importe debe ser mayor a $15,000.00 más IVA'
         
         IF @Ok = 20305
@@ -1802,6 +1802,7 @@ END
 RETURN
 END
 GO
+
 
 
 
