@@ -918,7 +918,7 @@ IF @REGIMENFIS = 626       and @lenrfc=13
                     FROM    Inv    i    
                     JOIN    InvD   d   ON  i.ID = d.ID    
                     WHERE   i.ID = @ID     
-                    AND     i.Mov = 'Consumo'     
+                    AND     i.Mov = 'Consumo Produccion'     
                     AND     i.Estatus = 'BORRADOR'     
                     AND     d.INFORCostoIndirecto = @INFORCostoIndirecto)    
             SELECT @Ok=20180, @OkRef='No Es Posible Afectar la Entrada Produccion si el Consumo no está CONCLUIDO'      
@@ -1802,6 +1802,7 @@ END
 RETURN
 END
 GO
+
 
 
 
