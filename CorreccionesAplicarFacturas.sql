@@ -1323,37 +1323,39 @@ IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='xpDespuesAfectar')
 DROP PROC [dbo].[xpDespuesAfectar]
 GO
 CREATE PROCEDURE [dbo].[xpDespuesAfectar]      
-@Modulo    char(5),                          
-@ID            int,                          
-@Accion    char(20),                          
-@Base    char(20),                          
-@GenerarMov   char(20),                          
-@Usuario    char(10),                          
-@SincroFinal   bit,                          
-@EnSilencio   bit,                          
-@Ok            int      OUTPUT,                          
-@OkRef         varchar(255) OUTPUT,                          
-@FechaRegistro datetime                           
+@Modulo								char(5),                          
+@ID									int,                          
+@Accion								char(20),                          
+@Base								char(20),                          
+@GenerarMov							char(20),                          
+@Usuario							char(10),                          
+@SincroFinal						bit,                          
+@EnSilencio							bit,                          
+@Ok									int      OUTPUT,                          
+@OkRef								varchar(255) OUTPUT,                          
+@FechaRegistro						datetime                           
 AS BEGIN                          
                   
-DECLARE     @Empresa     varchar(5),                          
-                  
-                       @IntelMESInterfase bit ,                        
-                  
-                       @MOV  VARCHAR(50),                        
-                  
-                       @MOVID VARCHAR(30),                        
-                  
-                       @ESTATUS  VARCHAR(30),                  
-                  
-        @SubClave   VARCHAR(20),            
-  @Clave  varchar(10),          
-        @IDNC           INT,      
-  @Sucursal  int,
-  @AplicaMovNota varchar(20),
-  @AplicaIDMovNota varchar(20),
-  @ImporteO	float,
-  @ImporteAct float
+DECLARE     @Empresa			char(5),                          
+@IntelMESInterfase				bit ,                        
+@Mov							VARCHAR(50),                        
+@MovId							VARCHAR(30),                        
+@Estatus						VARCHAR(30),                  
+@SubClave						VARCHAR(20),            
+@Clave							varchar(10),          
+@IDNC							INT,      
+@Sucursal						int,
+@AplicaMovNota					varchar(20),
+@AplicaIDMovNota				varchar(20),
+@ImporteO						float,
+@ImporteAct						float,
+@Cliente						varchar(20),
+@DiasMoratorios					int,
+@Saldo							money,
+@SaldoMN						money,
+@LimiteCreditoMN				money,
+@CreditoCte						money
+
                   
  --Integracion MES------------------------------------------------------------------------------------                          
                   
@@ -1478,18 +1480,38 @@ BEGIN
                   
 IF @Modulo ='VTAS' AND @Accion = 'AFECTAR' AND @Ok IS NULL
 BEGIN
-SELECT @Mov       = v.Mov,
-       @Clave     = Clave,
-       @SubClave  = SubClave
+SELECT @Clave				= Clave,
+       @SubClave			= SubClave,
+	   @Cliente				=v.Cliente,
+	   @Empresa				=v.Empresa,
+	   @Mov					=V.Mov,
+	   @LimiteCreditoMN		= ISNULL(CreditoLimite, 0.0000)
   FROM Venta      v
-  JOIN MovTipo    mt      ON v.Mov = mt.Mov AND mt.Modulo = @Modulo
+  JOIN MovTipo    mt        ON v.Mov = mt.Mov AND mt.Modulo = @Modulo
+  LEFT JOIN Cte   c 		ON c.Cliente=v.Cliente
  WHERE Id = @Id
 
        IF   @Clave = 'VTAS.P' AND @SubClave = 'VTAS.PNVK' --AND @Mov = 'Cotizacion'
        BEGIN
-       --EXEC MURSPCOMPARAPRECIOSDETALLE @ID                
-       EXEC MURSPAVISAPARTIDASDESCUENTO @ID, @Ok OUTPUT, @OkRef OUTPUT
-       END
+			   --EXEC MURSPCOMPARAPRECIOSDETALLE @ID                
+			   EXEC MURSPAVISAPARTIDASDESCUENTO @ID, @Ok OUTPUT, @OkRef OUTPUT
+
+			   IF @Mov = 'Cotizacion' AND @OK	IS NULL
+			   BEGIN
+			   		SELECT @DiasMoratorios = COALESCE(SUM(DiasMoratorios),0), @Saldo = COALESCE(SUM(Saldo),0)
+					  FROM CxcInfo
+					  WHERE Cliente = @Cliente
+						--AND Mov in ('Anticipo T','Cancel Sat Ingresos','Fact S Inv','Factura','Factura Com.Ext40','Factura SI','Nota Cargo')
+
+				 IF @DiasMoratorios > 0 AND @Saldo > 0.0000
+					SELECT @Ok = 80100, @OkRef = 'El Cliente cuenta con un saldo Vencido de $ '+TRIM(CONVERT(VARCHAR, CAST(@Saldo AS money), 1 ))
+				 ELSE
+						SELECT @CreditoCte = @LimiteCreditoMN-@Saldo
+		
+						IF @CreditoCte <= 0.0000
+						SELECT @Ok = 80100, @OkRef = 'El cliente no cuenta con Crédito disponible $ '+TRIM(CONVERT(varchar, CAST(@CreditoCte AS money), 1))
+				END
+		END
                   
       --SELECT @MOV=Mov FROM  Venta WHERE ID=@ID                          
                   
@@ -1769,42 +1791,67 @@ IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='xpMovValidar')
 DROP PROC [dbo].[xpMovValidar]
 GO
 CREATE PROCEDURE xpMovValidar
-@Modulo		char(5),
-@ID                  int,
-@Accion		char(20),
-@Base		char(20),
-@GenerarMov		char(20),
-@Usuario		char(10),
-@SincroFinal		bit,
-@EnSilencio	        bit,
-@Ok               	int 		OUTPUT,
-@OkRef            	varchar(255) 	OUTPUT,
-@FechaRegistro	datetime
+@Modulo						char(5),
+@ID							int,
+@Accion						char(20),
+@Base						char(20),
+@GenerarMov					char(20),
+@Usuario					char(10),
+@SincroFinal				bit,
+@EnSilencio					bit,
+@Ok               			int 		OUTPUT,
+@OkRef            			varchar(255) 	OUTPUT,
+@FechaRegistro				datetime
 AS BEGIN
 DECLARE
-@SubClave           VARCHAR(20),            
-@Clave              varchar(10)          
+@SubClave						VARCHAR(20),            
+@Clave							varchar(10),
+@Cliente						varchar(20),
+@DiasMoratorios					int,
+@Saldo							money,
+@SaldoMN						money,
+@LimiteCreditoMN				money,
+@CreditoCte						money,
+@Empresa						char(5),
+@Mov							VARCHAR(50)
 
 IF @Modulo ='VTAS' AND @Accion = 'VERIFICAR' --AND @Ok IS NULL
 BEGIN
-SELECT @Clave     = Clave,
-       @SubClave  = SubClave
+SELECT @Clave				= Clave,
+       @SubClave			= SubClave,
+	   @Cliente				=v.Cliente,
+	   @Empresa				=v.Empresa,
+	   @Mov					=V.Mov,
+	   @LimiteCreditoMN		= ISNULL(CreditoLimite, 0.0000)
+
   FROM Venta      v
-  JOIN MovTipo    mt      ON v.Mov = mt.Mov AND mt.Modulo = @Modulo
+  JOIN MovTipo    mt        ON v.Mov = mt.Mov AND mt.Modulo = @Modulo
+  LEFT JOIN Cte   c 		ON c.Cliente=v.Cliente
  WHERE Id = @Id
 
-       IF   @Clave = 'VTAS.P' AND @SubClave = 'VTAS.PNVK' --AND @Mov = 'Cotizacion'
-       BEGIN
-       --EXEC MURSPCOMPARAPRECIOSDETALLE @ID                
-       EXEC MURSPAVISAPARTIDASDESCUENTO @ID, @Ok OUTPUT, @OkRef OUTPUT
-       END
+IF   @Clave = 'VTAS.P' AND @SubClave = 'VTAS.PNVK' AND @OK IS NULL --AND @Mov = 'Cotizacion'
+BEGIN
+--EXEC MURSPCOMPARAPRECIOSDETALLE @ID                
+EXEC MURSPAVISAPARTIDASDESCUENTO @ID, @Ok OUTPUT, @OkRef OUTPUT
+
+IF @Mov = 'Cotizacion'
+ BEGIN
+		SELECT @DiasMoratorios = COALESCE(SUM(DiasMoratorios),0), @Saldo = COALESCE(SUM(Saldo),0)
+		  FROM CxcInfo
+		 WHERE Cliente = @Cliente
+		   --AND Mov in ('Anticipo T','Cancel Sat Ingresos','Fact S Inv','Factura','Factura Com.Ext40','Factura SI','Nota Cargo')
+
+		 IF @DiasMoratorios > 0 AND @Saldo > 0.0000
+			SELECT @Ok = 80100, @OkRef = 'El Cliente cuenta con un saldo Vencido de $ '+TRIM(CONVERT(VARCHAR, CAST(@Saldo AS Money), 1))
+		 ELSE
+				SELECT @CreditoCte = @LimiteCreditoMN-@Saldo
+		
+				IF @CreditoCte <= 0.0000
+				SELECT @Ok = 80100, @OkRef = 'El cliente no cuenta con Crédito disponible $ '+TRIM(CONVERT(varchar, CAST(@CreditoCte AS money), 1))
+END
+
+END
 END
 RETURN
 END
 GO
-
-
-
-
-
-
