@@ -1035,12 +1035,13 @@ SELECT @Alm                 =v.Almacen,
         @TipoComprobante    =ISNULL(CFD_tipoDeComprobante, ''),
         @GrupoTrabajo       =u.GrupoTrabajo,
         @OrigenTipo         =v.OrigenTipo,
-        @Total              =(Importe+Impuestos)
+        @Total              =Importe
   FROM Venta            v
   LEFT JOIN Alm         a       ON v.Almacen=a.Almacen
-  LEFT JOIN MovTipo     mt      ON mt.Mov=@Mov AND mt.Modulo = @Modulo
+  JOIN MovTipo     mt      ON mt.Modulo = 'VTAS' and v.Mov = mt.Mov
+  --LEFT JOIN MovTipo     mt      ON mt.Mov=@Mov AND mt.Modulo = @Modulo
   LEFT JOIN Usuario     u       ON u.Usuario = v.Usuario
- WHERE v.ID=@ID    
+ WHERE v.ID=@ID 
 
 --Esta integracion es para aquellos clientes que dan 100% de Descuento en los Articulos del detalle de Ventas, 
 --y sirve para insertar en la tabla de paso el Objeto impuesto 04 para que lo tome de ahi el xml
