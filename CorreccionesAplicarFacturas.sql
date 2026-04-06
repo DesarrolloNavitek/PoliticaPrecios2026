@@ -1915,3 +1915,132 @@ BEGIN
 		INSERT dbo.nvk_tb_CuotasClientesAnual (Cliente, Ejercicio) VALUES (@Cte, DATEPART(YYYY,GETDATE()))
 RETURN
 END
+GO
+SET ANSI_NULLS, QUOTED_IDENTIFIER OFF
+GO
+IF EXISTS (SELECT 1 FROM SYS.objects WHERE name ='nvk_tgRegHist_DesCte')
+DROP TRIGGER dbo.nvk_tgRegHist_DesCte
+GO
+CREATE TRIGGER nvk_tgRegHist_DesCte ON nvk_tb_CuotasClientesAnual
+FOR /*INSERT,*/ UPDATE
+AS BEGIN
+DECLARE
+@ID		int,
+@Llave		varchar(1000),
+@Empresa		varchar(5),
+@Sucursal		int,
+@Usuario		varchar(10),
+@EstacionTrabajo	int,
+@AccesoID		int
+IF dbo.fnEstaSincronizando() = 1 
+	RETURN
+IF NOT EXISTS(SELECT * FROM Version WHERE RegHist = 1) 
+	RETURN
+IF NOT EXISTS(SELECT * FROM CfgRegHist WHERE SysTabla = 'nvk_tb_CuotasClientesAnual' AND UPPER(Estatus) = 'ACTIVO') 
+	RETURN
+IF (SELECT COUNT(*) FROM INSERTED) <> 1 
+	RETURN
+
+SELECT  @AccesoID = MAX(ID) 
+  FROM Acceso 
+ WHERE SPID = @@SPID
+
+SELECT  @Empresa = Empresa, 
+		@Sucursal = Sucursal, 
+		@Usuario = Usuario, 
+		@EstacionTrabajo = EstacionTrabajo 
+FROM Acceso 
+WHERE ID = @AccesoID
+
+CREATE TABLE #Anterior (Campo varchar(255) COLLATE Database_Default NOT NULL, 
+						Valor varchar(255) COLLATE Database_Default NULL)
+
+CREATE TABLE #Nueva (Campo varchar(255) COLLATE Database_Default NOT NULL, 
+						Valor varchar(255) COLLATE Database_Default NULL)
+
+CREATE TABLE #INSERTED(Cliente varchar(255) COLLATE Database_Default NULL, 
+						Ejercicio varchar(255) COLLATE Database_Default NULL,  
+						Descuento varchar(255) COLLATE Database_Default NULL,  
+						CuotaAnual varchar(255) COLLATE Database_Default NULL)
+
+CREATE TABLE #DELETED(Cliente varchar(255) COLLATE Database_Default NULL, 
+						Ejercicio varchar(255) COLLATE Database_Default NULL,  
+						Descuento varchar(255) COLLATE Database_Default NULL,  
+						CuotaAnual varchar(255) COLLATE Database_Default NULL)
+
+INSERT INTO #INSERTED(Cliente, Ejercicio, Descuento, CuotaAnual)
+
+SELECT CONVERT(varchar(255), Cliente) AS Cliente, 
+		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
+		CONVERT(varchar(255), Descuento) AS Descuento,
+		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
+FROM INSERTED
+
+
+INSERT INTO #DELETED(Cliente, Ejercicio, Descuento, CuotaAnual )  
+
+SELECT CONVERT(varchar(255), Cliente) AS Cliente, 
+		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
+		CONVERT(varchar(255), Descuento) AS Descuento,
+		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
+FROM DELETED
+
+INSERT #Anterior (Campo, Valor) 
+
+SELECT Campo, Valor 
+FROM (
+		SELECT 
+		CONVERT(varchar(255), Cliente) AS Cliente, 
+		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
+		CONVERT(varchar(255), Descuento) AS Descuento,
+		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
+
+FROM #DELETED) 
+
+Origen UNPIVOT (Valor FOR Campo IN (Cliente, Ejercicio,Descuento,CuotaAnual)) AS Resultado
+
+INSERT #Nueva (Campo, Valor)
+
+SELECT Campo, Valor 
+FROM (
+SELECT CONVERT(varchar(255), Cliente) AS Cliente, 
+		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
+		CONVERT(varchar(255), Descuento) AS Descuento,
+		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
+FROM #INSERTED) 
+
+Origen UNPIVOT (Valor FOR Campo IN (Cliente, Ejercicio,Descuento,CuotaAnual)) AS Resultado
+
+EXEC spRegHistTriggerPK 'Cte', @Llave OUTPUT
+
+IF @Llave IS NOT NULL
+BEGIN
+INSERT RegHist (SysTabla, Llave, Empresa, Sucursal, Usuario, EstacionTrabajo) 
+		VALUES ('Cte', @Llave, @Empresa, @Sucursal, @Usuario, @EstacionTrabajo)
+
+SELECT @ID = SCOPE_IDENTITY()
+
+IF EXISTS(SELECT * FROM CfgRegHistCampo WHERE SysTabla = 'Cte')
+INSERT RegHistD (SysTabla, Llave, ID, Campo,    Valor,   ValorAnterior)
+SELECT 'Cte', @Llave, @ID, n.Campo, n.Valor, a.Valor
+FROM #Nueva n
+LEFT OUTER JOIN #Anterior a ON a.Campo = n.Campo
+WHERE ISNULL(a.Valor, '') <> ISNULL(n.Valor, '') 
+AND n.Campo 
+IN (SELECT Campo FROM CfgRegHistCampo WHERE SysTabla = 'nvk_tb_CuotasClientesAnual')
+ELSE
+INSERT RegHistD (SysTabla, Llave, ID, Campo,    Valor,   ValorAnterior)
+SELECT 'Cte', @Llave, @ID, n.Campo, n.Valor, a.Valor
+FROM #Nueva n
+LEFT OUTER JOIN #Anterior a ON a.Campo = n.Campo
+WHERE ISNULL(a.Valor, '') <> ISNULL(n.Valor, '')
+
+IF @@ROWCOUNT = 0
+DELETE RegHist WHERE SysTabla = 'Cte' AND Llave = @Llave AND ID = @ID
+END
+DROP TABLE #Anterior
+DROP TABLE #Nueva
+
+END
+GO
+
