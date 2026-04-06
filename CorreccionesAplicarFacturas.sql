@@ -1856,3 +1856,62 @@ END
 RETURN
 END
 GO
+
+SET DATEFIRST 7
+SET ANSI_NULLS OFF
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+SET LOCK_TIMEOUT -1
+SET QUOTED_IDENTIFIER OFF
+GO
+--EXEC sp_nvk_ActualizaCuotasCte '10000', '30','1200000'
+--SELECT * FROM nvk_tb_CuotasClientesAnual WHERE CLIENTE ='8586'
+IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='sp_nvk_ActualizaCuotasCte' AND type = 'P')
+DROP PROC dbo.sp_nvk_ActualizaCuotasCte
+GO
+CREATE PROC dbo.sp_nvk_ActualizaCuotasCte
+@Cte				varchar(10),
+@Descuento		float,
+@CuotaAnual		float
+AS
+BEGIN
+	DECLARE
+	@CuotaMensual		float, 
+	@Ejercicio			int
+	
+	SET @Ejercicio = DATEPART(YYYY,GETDATE())
+		
+	UPDATE nvk_tb_CuotasClientesAnual 
+	   SET Descuento       = @Descuento,
+           CuotaAnual      = @CuotaAnual
+     WHERE Cliente = @Cte 
+	   AND Ejercicio = @Ejercicio
+	
+    ---- UPSERT con MERGE (evita doble lectura del EXISTS + UPDATE/INSERT)
+    --MERGE dbo.nvk_tb_CuotasClientesAnual WITH (HOLDLOCK) AS NCCA
+    --USING (
+    --    SELECT @Cte AS Cliente, @Ejercicio AS Ejercicio
+    --) AS SPACC
+    --    ON NCCA.Cliente   = SPACC.Cliente
+    --    AND NCCA.Ejercicio = SPACC.Ejercicio
+    --WHEN MATCHED THEN
+    --    UPDATE SET
+
+    --WHEN NOT MATCHED THEN
+    --    INSERT (Cliente, Ejercicio, Descuento, CuotaAnual, CuotaMensual)
+    --    VALUES (@Cte, @Ejercicio, @Descuento, @CuotaAnual, @CuotaMensual);
+RETURN
+END
+GO
+IF EXISTS (SELECT 1 FROM SYS.objects WHERE name = 'nvk_sp_InsertaCteDes')
+DROP PROC dbo.nvk_sp_InsertaCteDes
+GO
+CREATE PROC dbo.nvk_sp_InsertaCteDes
+@Cte			varchar(10)
+AS
+BEGIN
+
+		IF NOT EXISTS (SELECT 1 FROM dbo.nvk_tb_CuotasClientesAnual WHERE Cliente = @Cte AND Ejercicio = DATEPART(YYYY,GETDATE()))
+
+		INSERT dbo.nvk_tb_CuotasClientesAnual (Cliente, Ejercicio) VALUES (@Cte, DATEPART(YYYY,GETDATE()))
+RETURN
+END
