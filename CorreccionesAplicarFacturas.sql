@@ -1956,60 +1956,59 @@ CREATE TABLE #Anterior (Campo varchar(255) COLLATE Database_Default NOT NULL,
 						Valor varchar(255) COLLATE Database_Default NULL)
 
 CREATE TABLE #Nueva (Campo varchar(255) COLLATE Database_Default NOT NULL, 
-						Valor varchar(255) COLLATE Database_Default NULL)
+					 Valor varchar(255) COLLATE Database_Default NULL)
 
 CREATE TABLE #INSERTED(Cliente varchar(255) COLLATE Database_Default NULL, 
-						Ejercicio varchar(255) COLLATE Database_Default NULL,  
-						Descuento varchar(255) COLLATE Database_Default NULL,  
-						CuotaAnual varchar(255) COLLATE Database_Default NULL)
+						Ejercicio int NULL,  
+						Descuento float NULL,  
+						CuotaAnual float NULL)
 
 CREATE TABLE #DELETED(Cliente varchar(255) COLLATE Database_Default NULL, 
-						Ejercicio varchar(255) COLLATE Database_Default NULL,  
-						Descuento varchar(255) COLLATE Database_Default NULL,  
-						CuotaAnual varchar(255) COLLATE Database_Default NULL)
+						Ejercicio int NULL,  
+						Descuento float NULL,  
+						CuotaAnual float NULL)
 
 INSERT INTO #INSERTED(Cliente, Ejercicio, Descuento, CuotaAnual)
-
 SELECT CONVERT(varchar(255), Cliente) AS Cliente, 
-		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
-		CONVERT(varchar(255), Descuento) AS Descuento,
-		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
+       Ejercicio AS Ejercicio,
+       Descuento AS Descuento,
+       CuotaAnual AS CuotaAnual
 FROM INSERTED
 
 
-INSERT INTO #DELETED(Cliente, Ejercicio, Descuento, CuotaAnual )  
-
+INSERT INTO #DELETED(Cliente, Ejercicio, Descuento, CuotaAnual)
 SELECT CONVERT(varchar(255), Cliente) AS Cliente, 
-		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
-		CONVERT(varchar(255), Descuento) AS Descuento,
-		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
+       Ejercicio AS Ejercicio,
+       Descuento AS Descuento,
+       CuotaAnual AS CuotaAnual
 FROM DELETED
 
-INSERT #Anterior (Campo, Valor) 
 
-SELECT Campo, Valor 
-FROM (
-		SELECT 
-		CONVERT(varchar(255), Cliente) AS Cliente, 
-		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
-		CONVERT(varchar(255), Descuento) AS Descuento,
-		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
+INSERT INTO #Anterior (Campo, Valor)
+SELECT Campo, Valor
+FROM #DELETED
+CROSS APPLY (
+    VALUES
+        ('Cliente',    CONVERT(varchar(255), Cliente)),
+        ('Ejercicio',  CONVERT(varchar(255), Ejercicio)),
+        ('Descuento',  CONVERT(varchar(255), Descuento)),
+        ('CuotaAnual', FORMAT(CuotaAnual, 'N2'))
 
-FROM #DELETED) 
+) AS Resultado(Campo, Valor)
 
-Origen UNPIVOT (Valor FOR Campo IN (Cliente, Ejercicio,Descuento,CuotaAnual)) AS Resultado
 
-INSERT #Nueva (Campo, Valor)
+INSERT INTO #Nueva (Campo, Valor)
+SELECT Campo, Valor
+FROM #INSERTED
+CROSS APPLY (
+    VALUES
+        ('Cliente',    CONVERT(varchar(255), Cliente)),
+        ('Ejercicio',  CONVERT(varchar(255), Ejercicio)),
+        ('Descuento',  CONVERT(varchar(50), Descuento, 128)),
+		('CuotaAnual', FORMAT(CuotaAnual, 'N2'))
+        --('CuotaAnual', CONVERT(varchar(50), CuotaAnual, 128))
+) AS Resultado(Campo, Valor)
 
-SELECT Campo, Valor 
-FROM (
-SELECT CONVERT(varchar(255), Cliente) AS Cliente, 
-		CONVERT(varchar(255), Ejercicio) AS Ejercicio,
-		CONVERT(varchar(255), Descuento) AS Descuento,
-		CONVERT(varchar(255), CuotaAnual) AS CuotaAnual
-FROM #INSERTED) 
-
-Origen UNPIVOT (Valor FOR Campo IN (Cliente, Ejercicio,Descuento,CuotaAnual)) AS Resultado
 
 EXEC spRegHistTriggerPK 'Cte', @Llave OUTPUT
 
@@ -2022,7 +2021,7 @@ SELECT @ID = SCOPE_IDENTITY()
 
 IF EXISTS(SELECT * FROM CfgRegHistCampo WHERE SysTabla = 'Cte')
 INSERT RegHistD (SysTabla, Llave, ID, Campo,    Valor,   ValorAnterior)
-SELECT 'Cte', @Llave, @ID, n.Campo, n.Valor, a.Valor
+		SELECT 'Cte', @Llave, @ID, n.Campo, n.Valor, a.Valor
 FROM #Nueva n
 LEFT OUTER JOIN #Anterior a ON a.Campo = n.Campo
 WHERE ISNULL(a.Valor, '') <> ISNULL(n.Valor, '') 
@@ -2043,4 +2042,3 @@ DROP TABLE #Nueva
 
 END
 GO
-
