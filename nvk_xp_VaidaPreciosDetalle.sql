@@ -1,8 +1,9 @@
-IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'nvk_xp_ValidaPreciosDetalle')
-DROP PROCEDURE nvk_xp_ValidaPreciosDetalle
+IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='nvk_xp_ValidaPreciosDetalle' AND type ='P')
+DROP PROC [dbo].[nvk_xp_ValidaPreciosDetalle]
 GO
 CREATE PROC nvk_xp_ValidaPreciosDetalle  
     @Id                 int,
+    @Mov                varchar(20),
     @OK                 int output,
     @OkRef              varchar(255) output
 AS
@@ -36,8 +37,8 @@ DECLARE
                 vb.Articulo,
                 vd.Renglon,
                 vd.RenglonID,
-               (vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100) AS PrecioMinimo,
-               (vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100) AS PrecioVenta
+               ROUND((vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100),2,1) AS PrecioMinimo,
+               ROUND((vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100),2,1) AS PrecioVenta
         FROM VentaBase vb
         LEFT JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
         --JOIN Art a ON a.Articulo = vb.Articulo
@@ -52,12 +53,13 @@ DECLARE
        AND vd.RenglonID = d.RenglonID
        AND PrecioVenta < PrecioMinimo
 
-       IF @Articulo IS NOT NULL
+       IF @Articulo IS NOT NULL AND @Mov <> 'Cotizacion'
        BEGIN
        SELECT @OK = 20305,@OkRef = 'El artículo '+TRIM(@Articulo)+' no cubre el precio minimo'
        END
 RETURN
 END
+GO
 
 
 
