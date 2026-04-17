@@ -45,8 +45,8 @@ AND YEAR(v.FechaEmision) = ntcca.Ejercicio
 END
 GO
 /******************************************* nvk_xp_ValidaPreciosDetalle  **********************************************/
-IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'nvk_xp_ValidaPreciosDetalle')
-DROP PROCEDURE nvk_xp_ValidaPreciosDetalle
+IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='nvk_xp_ValidaPreciosDetalle' AND type ='P')
+DROP PROC [dbo].[nvk_xp_ValidaPreciosDetalle]
 GO
 CREATE PROC nvk_xp_ValidaPreciosDetalle  
     @Id                 int,
@@ -84,8 +84,8 @@ DECLARE
                 vb.Articulo,
                 vd.Renglon,
                 vd.RenglonID,
-               (vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100) AS PrecioMinimo,
-               (vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100) AS PrecioVenta
+               ROUND((vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100),2,1) AS PrecioMinimo,
+               ROUND((vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100),2,1) AS PrecioVenta
         FROM VentaBase vb
         LEFT JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
         --JOIN Art a ON a.Articulo = vb.Articulo
@@ -895,11 +895,11 @@ IF @REGIMENFIS = 626       and @lenrfc=13
   SELECT @MovTipo=Clave FROM MovTipo WHERE Modulo=@Modulo AND Mov=@Mov       
       
   /***** validacion para evitar cancelar movs originados de mes, JRD 07-Nov-2018 *****/      
-  IF (@Accion='CANCELAR' )      
+ IF (@Accion='CANCELAR' )      
   BEGIN       
    IF (@MovTipo IN ('INV.E','INV.S') AND @OrigenTipo='MES') AND @MOV IN ('Consumo Produccion','Entrada Produccion')      
    BEGIN      
-    SELECT @Ok=20180, @OkRef='No Se Puede Cancelar. Movimiento Generado Desde MES'      
+  SELECT @Ok=20180, @OkRef='No Se Puede Cancelar. Movimiento Generado Desde MES'      
    END      
   END       
       
@@ -914,21 +914,21 @@ IF @REGIMENFIS = 626       and @lenrfc=13
         JOIN    InvD    d   ON  i.ID = d.ID    
         WHERE   i.ID = @ID    
             
-        IF EXISTS(SELECT    i.ID     
-                    FROM    Inv    i    
-                    JOIN    InvD   d   ON  i.ID = d.ID    
-                    WHERE   i.ID = @ID     
-                    AND     i.Mov = 'Consumo Produccion'     
-                    AND     i.Estatus = 'BORRADOR'     
-                    AND     d.INFORCostoIndirecto = @INFORCostoIndirecto)    
-            SELECT @Ok=20180, @OkRef='No Es Posible Afectar la Entrada Produccion si el Consumo no está CONCLUIDO'      
-    END    
-   --IF (@MovTipo IN ('INV.S', 'INV.E') AND @SubClave IN ('INV.ENTPRO', 'INV.CONSPRO') AND @Accion='AFECTAR' )       
-   IF (@MovTipo IN ('INV.S', 'INV.E') AND @OrigenTipo IS NULL) AND @MOV IN ('Consumo Produccion','Entrada Produccion')      
-   BEGIN      
-    SELECT @Ok=20180, @OkRef='No Es Posible Generar Movimientos No Generados Desde MES Directamente'      
-   END      
-  END    
+        --IF EXISTS(
+		SELECT  @Mov = RTRIM(i.Mov),
+				@MovID = RTRIM(i.MovID) -- i.ID     
+        FROM    Inv    i    
+        JOIN    InvD   d   ON  i.ID = d.ID    
+        WHERE   
+		/*i.ID = @ID     
+        AND  */   i.Mov = 'Consumo Produccion'     
+        AND     i.Estatus = 'BORRADOR'     
+        AND     d.INFORCostoIndirecto = @INFORCostoIndirecto
+					--)    
+		IF NULLIF(@Mov, '') IS NOT NULL AND NULLIF(@MovID, '') IS NOT NULL
+            SELECT @Ok=20180, @OkRef='No Es Posible Afectar la Entrada Produccion si el Consumo no está CONCLUIDO<BR><BR>Movimiento: '+@Mov+' '+@MovID      
+     END
+	 END
     
 --------------------------------------------------------------------------------------------    
     
@@ -1170,13 +1170,15 @@ SELECT @Alm                 =v.Almacen,
                 vd.RenglonID,
                (vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100) AS PrecioMinimo,
                (vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100) AS PrecioVenta
+               /*ROUND((vb.PrecioLista - (ISNULL(vb.Descuento,0) * vb.PrecioLista)/100),2,1) AS PrecioMinimo,
+               ROUND((vd.Precio - (vd.Precio * ISNULL(vd.DescuentoLinea,0))/100),2,1) AS PrecioVenta*/
         FROM VentaBase vb
         LEFT JOIN VentaD vd ON vd.ID = vb.id AND vd.Articulo = vb.Articulo
     )
 
     UPDATE vd
        SET DescripcionExtra = 
-      CASE WHEN d.PrecioVenta < d.PrecioMinimo THEN 'Por Debajo del Precio Permitido '+ (CONVERT(VARCHAR(10),(PrecioMinimo-PrecioVenta))) ELSE  NULL END
+      CASE WHEN ROUND(d.PrecioVenta,2,1) < ROUND(d.PrecioMinimo,2,1) THEN 'Por Debajo del Precio Permitido '+ (CONVERT(VARCHAR(10),(ROUND(d.PrecioMinimo,2,1)-ROUND(d.PrecioVenta,2,1)))) ELSE  NULL END
       FROM VentaD vd
       JOIN Diferencia d ON vd.ID = d.ID 
      WHERE vd.Renglon=d.Renglon
