@@ -48,7 +48,7 @@ GO
 IF EXISTS (SELECT 1 FROM SYS.OBJECTS WHERE name ='nvk_xp_ValidaPreciosDetalle' AND type ='P')
 DROP PROC [dbo].[nvk_xp_ValidaPreciosDetalle]
 GO
-CREATE PROC nvk_xp_ValidaPreciosDetalle  
+CREATE OR ALTER PROC nvk_xp_ValidaPreciosDetalle  
     @Id                 int,
     @Mov                varchar(20),
     @OK                 int output,
@@ -59,17 +59,17 @@ DECLARE
     @Articulo  varchar(20)
 
 ;WITH VentaBase AS (
-        SELECT v.id, ntcca.Descuento, C.ListaPreciosEsp, vd.Articulo,
+SELECT v.id, ntcca.Descuento, C.ListaPreciosEsp, vd.Articulo,
                CASE 
-                   WHEN C.ListaPreciosEsp = '(Precio Lista)' THEN a.PrecioLista
-                   WHEN C.ListaPreciosEsp = '(Precio 1)' THEN a.PrecioLista
-                   WHEN C.ListaPreciosEsp = '(Precio 2)' THEN a.Precio2
-                   WHEN C.ListaPreciosEsp = '(Precio 3)' THEN a.Precio3
-                   WHEN C.ListaPreciosEsp = '(Precio 4)' THEN a.Precio4
-                   WHEN C.ListaPreciosEsp = '(Precio 5)' THEN a.Precio5
-                   WHEN C.ListaPreciosEsp = '(Precio 6)' THEN a.Precio6
-                   WHEN C.ListaPreciosEsp = '(Precio 7)' THEN a.Precio7
-                   WHEN C.ListaPreciosEsp = '(Precio 8)' THEN a.Precio8
+                   WHEN C.ListaPreciosEsp = '(Precio Lista)' THEN ROUND(a.PrecioLista  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 1)' THEN ROUND(a.PrecioLista  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 2)' THEN ROUND(a.Precio2  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 3)' THEN ROUND(a.Precio3 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 4)' THEN ROUND(a.Precio4  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 5)' THEN ROUND(a.Precio5 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 6)' THEN ROUND(a.Precio6 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 7)' THEN ROUND(a.Precio7 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 8)' THEN ROUND(a.Precio8 / v.TipoCambio,2,1)
                    ELSE NULL 
                END AS PrecioLista
         FROM Venta v
@@ -111,7 +111,7 @@ GO
 IF EXISTS (SELECT 1 FROM Sys.procedures WHERE name = 'xpAntesAfectar')
 DROP PROCEDURE dbo.xpAntesAfectar
 GO
-CREATE PROCEDURE dbo.xpAntesAfectar
+CREATE OR ALTER PROCEDURE xpAntesAfectar    
 @Modulo                     char(5),                                                                                                            
 @ID                         int,                                                                                                            
 @Accion                     char(20),                                                                                                            
@@ -143,7 +143,7 @@ AS BEGIN
  @CtaDinero                 varchar(10),                                                                                                      
  @FormaCobro                varchar(50),                                                                                                    
  @CtePais                   varchar(50),                                      
- @PesoTotal                 float,                                                                                                
+ @PesoTotal                 float,                                                                            
  @ClavePresupuestal         varchar (50),                      
  @PesoFaltante              float,                         
  @AnticipoSaldo             float,                                           
@@ -224,14 +224,14 @@ BEGIN
 EXEC MURSPVALIDAGASTOS   @ID,@OK OUTPUT,@OKREF OUTPUT                        
                         
 END                        
-                        
+     
                         
 END                        
                         
                         
                         
-    ------------------------- SERIE/LOTE ENTRADA COMPRA CALIDAD  ------------------------------------                                 
-                                         
+    ------------------------- SERIE/LOTE ENTRADA COMPRA CALIDAD  ------------------------------------                            
+                                    
   IF @Modulo='COMS'                                           
   BEGIN                                         
                                         
@@ -300,15 +300,35 @@ END
        SELECT @Ok=666,@OkRef='EL ALMACEN ESTA CERRADO'                                          
        END                                          
                  IF @Modulo='INV'                                          
-       BEGIN                                          
+       BEGIN              
        SELECT @ALM =ALMACEN,@ALMDESTINO=AlmacenDestino,@ESTATUS=ESTATUS,@MOV=mov FROM INV WHERE ID=@ID                                          
                                           
-       SELECT @CERRADO = ISNULL(CERRARALM,0) FROM Alm WHERE Almacen=@ALM                                          
+       SELECT @CERRADO = ISNULL(CERRARALM,0) FROM Alm WHERE Almacen=@ALM                
                                           
              IF @CERRADO=1 AND @ESTATUS='SINAFECTAR' AND @MOV<>'Inventario Fisico'                                          
                                           
        SELECT @Ok=4466,@OkRef='EL ALMACEN ESTA CERRADO'                              
-       END                                          
+       END 
+	   
+	   IF @Ok IS NULL
+	   BEGIN
+	   SELECT @MovTipo = Clave
+	     FROM Inv a
+		 JOIN MovTipo c ON a.Mov=c.Mov AND c.Modulo = @Modulo
+		WHERE a.ID = @ID
+
+
+		--validación centro de costos en inventarios
+	   	IF @MovTipo IN ('INV.E','INV.S')
+		BEGIN
+
+		IF EXISTS (SELECT TOP 1 1 ContUso FROM InvD WHERE ID = @ID AND ISNULL(ContUso,'')='')
+
+		BEGIN
+			SELECT @Ok = 10065, @OkRef = 'El centro de costos debe tener un valor'
+		END
+		END
+		END
                                           
                                           
                                           
@@ -355,7 +375,7 @@ END
     SELECT @MOV=Mov, @ESTATUS = Estatus FROM Compra                                                                                                          
     WHERE @ID = ID                          
                                                                  
-                                                                
+                                                   
  IF @ESTATUS='SINAFECTAR'  AND @MOV IN (  SELECT Mov FROM MovTipo WHERE Modulo='COMS' AND Clave IN('COMS.O','COMS.R'))                                                                
  BEGIN                                                                
                                                             
@@ -403,8 +423,8 @@ END
 ----------------------- Fin Costo por Prov Orden Compra -------------------------------------------                                                
 --------------------------- Costo Obligatorio Orden Compra ----------------------------------------                                          
   IF @Accion IN('AFECTAR')                                                
-  BEGIN                                                
-   IF  @Modulo = 'COMS'                                                                                                     
+  BEGIN      
+   IF  @Modulo = 'COMS'                               
    BEGIN                                                                
     SELECT @MOV=Mov, @ESTATUS = Estatus, @Articulo=CD.Articulo FROM Compra C                                                  
  LEFT JOIN CompraD CD ON C.ID=CD.ID                                                
@@ -425,6 +445,9 @@ BEGIN
 If @Modulo='GAS'                                                                       
 BEGIN                                                                       
 select @Estatus=Estatus, @Movimiento=V.Mov, @Clave=mt.Clave, @Empresa=v.Empresa, @Sucursal=v.Sucursal,  @CentroCosto=ISNULL(NULLIF(gd.ContUso, ' '), 'NA'),     @Origen=ISNULL(NULLIF(v.Origen, ' '), 'NA')                                                   
+
+
+
       From Gasto  V                           
 left join GastoD gd on v.ID=gd.ID                     
 left join MovTipo mt on V.Mov=mt.Mov and mt.Modulo='GAS'                                                                                               
@@ -443,9 +466,9 @@ BEGIN
                                                                                        
   END*/                                                                                      
   END                                               
-  IF @Clave='GAS.G' and @Estatus='SINAFECTAR' and @Origen='NA'                                                                                                         
-  BEGIN                                                                                       
- Select @ok=10065, @OkRef='El Gasto debe tener una solicitud origen'                                                                                                          
+  IF @Clave='GAS.G' and @Estatus='SINAFECTAR' and @Origen='NA'             
+  BEGIN                                                                            
+ Select @ok=10065, @OkRef='El Gasto debe tener una solicitud origen'        
   END                                                                                                   
   END                                                                                                
   end                                                              
@@ -456,6 +479,9 @@ BEGIN
 --If @Modulo='VTAS'    
 --BEGIN                                          
 --select @Estatus=Estatus, @Movimiento=V.Mov, @Clave=mt.Clave, @Empresa=v.Empresa, @Sucursal=v.Sucursal,  @CentroCosto=ISNULL(NULLIF(vd.ContUso, ' '), 'NA'),    @Origen=ISNULL(NULLIF(v.Origen, ' '), 'NA')                                                  
+
+
+
  --From Venta  V                                            
 --left join VentaD vd on v.ID=vd.ID                                                                                                          
 --left join MovTipo mt on V.Mov=mt.Mov and mt.Modulo='VTAS'                                                                                                          
@@ -558,6 +584,13 @@ end
 --If @Modulo='COMS'                       
 --BEGIN                                                  
 --select @Estatus=Estatus, @Movimiento=C.Mov, @Clave=mt.Clave, @Empresa=C.Empresa, @Sucursal=C.Sucursal,  @CentroCosto=ISNULL(NULLIF(Cd.ContUso, ' '), 'NA'),     @Origen=ISNULL(NULLIF(C.Origen, ' '), 'NA')                                                 
+
+
+
+
+
+
+
 --From Compra C                         
 --left join CompraD cd on c.ID=cd.ID                                                                               
 --left join MovTipo mt on c.Mov=mt.Mov and mt.Modulo='COMS'                                                                                                          
@@ -569,7 +602,7 @@ end
 --     Select @ok=10065, @OkRef='Coloca Centro de Costos'                                                                                                           
 --  END                                                                                                
 --  END                                                                                                
---  end                                                                                                
+--  end                                                                  
 --  end                                                                            
 ---------------------------------------------Fin Validación------------------------------                                                               
  /*******Inicio Copiar MovId Orden Compra********/                                                                                   
@@ -611,7 +644,7 @@ WHERE @ID = ID
   IF EXISTS (SELECT * FROM Compra C LEFT JOIN CompraD CD ON C.ID=CD.ID                    
     LEFT JOIN Art A ON CD.Articulo=A.Articulo                                                            
     WHERE @ID=C.ID AND @MOV IN  ('Requisicion','Requisicion Imp' ,'Orden Compra', 'Orden Compra Imp') AND A.SeCompra=0)                                                            
-  BEGIN                                                                      
+  BEGIN 
        Select @ok=10065, @OkRef='El Articulo '+@Articulo+' No Se Compra'                            
   END                                                             
   END                                                          
@@ -746,7 +779,7 @@ IF @REGIMENFIS = 626       and @lenrfc=13
       BEGIN        
         UPDATE CompraD SET FechaCaducidad = @FechaCaducidad        
          WHERE ID = @ID        
-           AND Renglon = @Renglon        
+           AND Renglon = @Renglon      
            AND RenglonSub = @RenglonSub        
         
         FETCH NEXT FROM crCompraDFC INTO @Articulo, @Renglon, @RenglonSub, @FechaCaducidad        
@@ -820,7 +853,7 @@ IF @REGIMENFIS = 626       and @lenrfc=13
   --           AND e.Estatus = 'PENDIENTE')        
   --          SELECT @Ok = 10060, @OkRef = 'Usuario restringido'        
   --    END        
-  --  END -- VP              
+  --  END -- VP 
   --END        
         
   IF @Modulo = 'INV' AND @Accion IN ('VERIFICAR', 'AFECTAR') AND @Ok IS NULL        
@@ -895,7 +928,7 @@ IF @REGIMENFIS = 626       and @lenrfc=13
   SELECT @MovTipo=Clave FROM MovTipo WHERE Modulo=@Modulo AND Mov=@Mov       
       
   /***** validacion para evitar cancelar movs originados de mes, JRD 07-Nov-2018 *****/      
- IF (@Accion='CANCELAR' )      
+  IF (@Accion='CANCELAR' )      
   BEGIN       
    IF (@MovTipo IN ('INV.E','INV.S') AND @OrigenTipo='MES') AND @MOV IN ('Consumo Produccion','Entrada Produccion')      
    BEGIN      
@@ -927,8 +960,13 @@ IF @REGIMENFIS = 626       and @lenrfc=13
 					--)    
 		IF NULLIF(@Mov, '') IS NOT NULL AND NULLIF(@MovID, '') IS NOT NULL
             SELECT @Ok=20180, @OkRef='No Es Posible Afectar la Entrada Produccion si el Consumo no está CONCLUIDO<BR><BR>Movimiento: '+@Mov+' '+@MovID      
-     END
-	 END
+    END    
+   --IF (@MovTipo IN ('INV.S', 'INV.E') AND @SubClave IN ('INV.ENTPRO', 'INV.CONSPRO') AND @Accion='AFECTAR' )       
+   IF (@MovTipo IN ('INV.S', 'INV.E') AND @OrigenTipo IS NULL) AND @MOV IN ('Consumo Produccion','Entrada Produccion')      
+   BEGIN      
+    SELECT @Ok=20180, @OkRef='No Es Posible Generar Movimientos No Generados Desde MES Directamente'      
+   END      
+  END    
     
 --------------------------------------------------------------------------------------------    
     
@@ -1035,7 +1073,7 @@ SELECT @Alm                 =v.Almacen,
         @TipoComprobante    =ISNULL(CFD_tipoDeComprobante, ''),
         @GrupoTrabajo       =u.GrupoTrabajo,
         @OrigenTipo         =v.OrigenTipo,
-        @Total              =Importe
+        @Total              =Importe * V.TipoCambio
   FROM Venta            v
   LEFT JOIN Alm         a       ON v.Almacen=a.Almacen
   JOIN MovTipo     mt      ON mt.Modulo = 'VTAS' and v.Mov = mt.Mov
@@ -1082,7 +1120,7 @@ SELECT @Alm                 =v.Almacen,
        IF @OK IS NULL
 
        EXEC MURSPORDENADETALLEVTAS @ID         
-           
+      
        EXEC MURSPVALIDAPRECIODESCUENTO  @ID,@OK OUTPUT,@OKREF OUTPUT
        
        
@@ -1145,15 +1183,15 @@ SELECT @Alm                 =v.Almacen,
        ;WITH VentaBase AS (
         SELECT v.id, ntcca.Descuento, C.ListaPreciosEsp, vd.Articulo,
                CASE 
-                   WHEN C.ListaPreciosEsp = '(Precio Lista)' THEN a.PrecioLista
-                   WHEN C.ListaPreciosEsp = '(Precio 1)' THEN a.PrecioLista
-                   WHEN C.ListaPreciosEsp = '(Precio 2)' THEN a.Precio2
-                   WHEN C.ListaPreciosEsp = '(Precio 3)' THEN a.Precio3
-                   WHEN C.ListaPreciosEsp = '(Precio 4)' THEN a.Precio4
-                   WHEN C.ListaPreciosEsp = '(Precio 5)' THEN a.Precio5
-                   WHEN C.ListaPreciosEsp = '(Precio 6)' THEN a.Precio6
-                   WHEN C.ListaPreciosEsp = '(Precio 7)' THEN a.Precio7
-                   WHEN C.ListaPreciosEsp = '(Precio 8)' THEN a.Precio8
+                   WHEN C.ListaPreciosEsp = '(Precio Lista)' THEN ROUND(a.PrecioLista  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 1)' THEN ROUND(a.PrecioLista  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 2)' THEN ROUND(a.Precio2  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 3)' THEN ROUND(a.Precio3 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 4)' THEN ROUND(a.Precio4  / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 5)' THEN ROUND(a.Precio5 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 6)' THEN ROUND(a.Precio6 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 7)' THEN ROUND(a.Precio7 / v.TipoCambio,2,1)
+                   WHEN C.ListaPreciosEsp = '(Precio 8)' THEN ROUND(a.Precio8 / v.TipoCambio,2,1)
                    ELSE NULL 
                END AS PrecioLista
         FROM Venta v
@@ -1262,7 +1300,7 @@ País
         JOIN Venta e ON d.Aplica = e.Mov AND d.AplicaID = e.MovID AND e.Empresa = @Empresa        
         JOIN MovFlujo m ON e.ID = m.OID AND m.OModulo = 'VTAS' AND m.DModulo = 'TMA'        
         JOIN TMA t ON m.DID = t.ID AND t.Estatus = 'PENDIENTE'        
-        JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo        
+        JOIN TMAD td on t.ID = td.ID AND d.Articulo = td.Articulo   
        WHERE d.ID = @ID        
          AND e.Estatus = 'PENDIENTE'        
          AND ISNULL(td.CantidadPendiente, 0) > 0        
